@@ -1,0 +1,25 @@
+{
+  "name": "@wraith13/vscel",
+  "version": "0.0.0",
+  "description": "Common libraries for Visual Studio Code Extension",
+  "keywords": [
+    "vscode",
+    "vsce",
+    "extension"
+  ],
+  "main": "library/source/index.js",
+  "types": "library/source/index.d.ts",
+  "bugs": {
+    "url": "https://github.com/wraith13/vscel/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wraith13/vscel.git"
+  },
+  "author": "wraith13",
+  "license": "BSL-1.0",
+  "devDependencies": {
+    "@types/node": "^11.13.13",
+    "typescript": "^3.3.3"
+  }
+}
