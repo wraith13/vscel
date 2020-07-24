@@ -3,13 +3,13 @@
         "module": "commonjs",
         "moduleResolution": "node",
         "declaration": true,
-        "target": "es5",
+        "target": "es6",
         "lib": [
             "es6",
             "scripthost"
         ],
-        "noImplicitAny": false,
-        "strictNullChecks": false,
+        "noImplicitAny": true,
+        "strictNullChecks": true,
         "noFallthroughCasesInSwitch": true,
         "noImplicitReturns": true,
         "noImplicitThis": true,
@@ -28,7 +28,8 @@
         "pretty": false,
         "noEmitOnError": true,
         "outDir": "library",
-        "rootDir": "."
+        "rootDir": "source",
+        "strict": true
     },
     "exclude": [
         "library"

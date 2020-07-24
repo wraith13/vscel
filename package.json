@@ -7,8 +7,8 @@
     "vsce",
     "extension"
   ],
-  "main": "library/source/index.js",
-  "types": "library/source/index.d.ts",
+  "main": "library/index.js",
+  "types": "library/index.d.ts",
   "bugs": {
     "url": "https://github.com/wraith13/vscel/issues"
   },
@@ -19,7 +19,11 @@
   "author": "wraith13",
   "license": "BSL-1.0",
   "devDependencies": {
-    "@types/node": "^11.13.13",
-    "typescript": "^3.3.3"
+    "@types/vscode": "^1.45.0",
+    "@types/node": "^13.11.0",
+    "eslint": "^6.8.0",
+    "@typescript-eslint/parser": "^2.30.0",
+    "@typescript-eslint/eslint-plugin": "^2.30.0",
+    "typescript": "^3.8.3"
   }
 }
