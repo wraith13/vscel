@@ -1,22 +1,89 @@
-export const simple = <valueT>(a: valueT, b: valueT) =>
+export type TypeOfResultType = "unknown" | "object" | "boolean" | "number" | "bigint" | "string" | "symbol" | "function" | string;
+export type CompareResultType = -1 | 0 | 1;
+export const basic = <valueT>(a: valueT, b: valueT): CompareResultType =>
     a < b ? -1:
     b < a ? 1:
     0;
-export const make = <objectT, valueT>(getValue: (object: objectT) => valueT) =>
-    (a: objectT, b: objectT) => simple(getValue(a), getValue(b));
-export const makeTypeCondition = <objectT, valueT>(type: string, getValue: (object: objectT) => valueT) =>
-    undefined === getValue ?
-        (a: objectT, b: objectT) => type === typeof a && type === typeof b:
-        (a: objectT, b: objectT) => type === typeof getValue(a) && type === typeof getValue(b);
-export const withCondition = <objectT, valueT>(conditionOrType: (a: objectT, b: objectT) => boolean, getValue: (object: objectT) => valueT) =>
-    (a: objectT, b: objectT) => conditionOrType(a, b) ? make(getValue)(a, b): 0;
-export const merge = <valueT>(comparerList: ((a: valueT, b: valueT) => number)[]) => (a: valueT, b: valueT) =>
+export interface RawSource<objectT>
 {
-    let result = 0;
-    for(let i = 0; i < comparerList.length && 0 === result; ++i)
+    raw: (a: objectT, b: objectT) => CompareResultType;
+}
+export interface Source<objectT, valueT, valueT2>
+{
+    condition?: ((a: objectT, b: objectT) => boolean) | TypeSource<objectT, valueT2>;
+    getter: (object: objectT) => valueT;
+}
+export interface TypeSource<objectT, valueT>
+{
+    getter?: (object: objectT) => valueT;
+    type: TypeOfResultType;
+}
+export const make = <objectT, valueT = unknown, valueT2 = unknown>
+(
+    source: ((object: objectT) => valueT) | RawSource<objectT> | Source<objectT, valueT, valueT2> |
+        ((((object: objectT) => valueT) | RawSource<objectT> | Source<objectT, valueT, valueT2>)[])
+): ((a: objectT, b: objectT) => CompareResultType) =>
+{
+    const invoker = <objectT>(i: ((object: objectT) => valueT) | RawSource<objectT> | Source<objectT, valueT, valueT2>): ((a: objectT, b: objectT) => CompareResultType) | undefined =>
     {
-        result = comparerList[i](a, b);
+        const f = i as ((object: objectT) => valueT);
+        if ("function" === typeof f)
+        {
+            return (a: objectT, b: objectT) => basic(f(a), f(b));
+        }
+        const r = i as RawSource<objectT>;
+        if (undefined !== r?.raw)
+        {
+            return r.raw;
+        }
+        const s = i as Source<objectT, valueT, valueT2>;
+        if (undefined !== s?.getter)
+        {
+            const body = (a: objectT, b: objectT) => basic(s.getter(a), s.getter(b));
+            if (undefined === s.condition)
+            {
+                return body;
+            }
+            else
+            {
+                const f = s.condition as ((a: objectT, b: objectT) => boolean);
+                if ("function" === typeof f)
+                {
+                    return (a: objectT, b: objectT) => f(a, b) ? body(a, b): 0;
+                }
+                else
+                {
+                    const t = (s.condition as TypeSource<objectT, valueT2>);
+                    const getter = t.getter;
+                    if (undefined === getter)
+                    {
+                        return (a: objectT, b: objectT) => t.type === typeof a && t.type === typeof b ? body(a, b): 0;
+                    }
+                    else
+                    {
+                        return (a: objectT, b: objectT) => t.type === typeof getter(a) && t.type === typeof getter(b) ? body(a, b): 0;
+                    }
+                }
+            }
+        }
+        return undefined;
+    };
+    if (Array.isArray(source))
+    {
+        const comparerList = <((a: objectT, b: objectT) => CompareResultType)[]>source.map(invoker).filter(i => undefined !== i);
+        return (a: objectT, b: objectT) =>
+        {
+            let result: CompareResultType  = 0;
+            for(let i = 0; i < comparerList.length && 0 === result; ++i)
+            {
+                result = comparerList[i](a, b);
+            }
+            return result;
+        };
     }
-    return result;
+    else
+    {
+        return invoker(source) ?? (() => 0);
+    }
 };
-export const lowerCase = merge<string>([make(a => a.toLowerCase()), simple]);
+export const lowerCase = make<string>([a => a.toLowerCase(), { raw:basic }]);
