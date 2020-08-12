@@ -1,5 +1,5 @@
-//  ここの型情報は vscode.extensions.all.map(i => i.packageJSON) の為のモノで、これはオリジナルの package.json と微妙に異なっており
-//  実際のデータと `https://json.schemastore.org/package` と `vscode://schemas/vscode-extensions` を付き合わせたモノです。
+// ここの型情報は vscode.extensions.all.map(i => i.packageJSON) の為のモノで、これはオリジナルの package.json と微妙に異なっており
+// 実際のデータと `https://json.schemastore.org/package` と `vscode://schemas/vscode-extensions` を付き合わせたモノです。
 
 export type PrimaryConfigurationType = "null" | "boolean" | "string" | "integer" | "number" | "array" | "object";
 export type ConfigurationType = PrimaryConfigurationType | PrimaryConfigurationType[];
@@ -42,8 +42,8 @@ export interface Command
     category?: LocalizableString;
     icon?: string |
     {
-        dark: string;
-        light: string;
+    dark: string;
+    light: string;
     };
 }
 export interface Keybinding
@@ -130,9 +130,9 @@ export interface Color
     description?: string;
     defaults?:
     {
-        dark?: string;
-        light?: string;
-        highContrast?: string;
+    dark?: string;
+    light?: string;
+    highContrast?: string;
     };
 };
 export interface Contributes
@@ -172,16 +172,47 @@ export enum Theme {
     Dark = "dark",
     Light = "light",
 }
-export interface Scripts {
-    /**
-     * パッケージが VS Code 拡張機能として公開される前に実行されるスクリプト。
-     */
+export interface Scripts
+{
+    install?: string;
+    postinstall?: string;
+    // Run AFTER the tarball has been generated and moved to its final destination.
+    postpack?: string;
+    postpublish?: string;
+    postrestart?: string;
+    poststart?: string;
+    poststop?: string;
+    posttest?: string;
+    // Run AFTER the package is uninstalled
+    postuninstall?: string;
+    // Run AFTER bump the package version
+    postversion?: string;
+    // Run BEFORE the package is installed
+    preinstall?: string;
+    // run BEFORE a tarball is packed (on npm pack, npm publish, and when installing git dependencies)
+    prepack?: string;
+    // Run both BEFORE the package is packed and published, and on local npm install without any arguments. This is run AFTER prepublish, but BEFORE prepublishOnly
+    prepare?: string;
+    // Run BEFORE the package is published (Also run on local npm install without any arguments)
+    prepublish?: string;
+    // Run BEFORE the package is prepared and packed, ONLY on npm publish
+    prepublishOnly?: string;
+    prerestart?: string;
+    prestart?: string;
+    prestop?: string;
+    pretest?: string;
+    preuninstall?: string;
+    preversion?: string;
+    publish?: string;
+    restart?: string;
+    start?: string;
+    stop?: string;
+    test?: string;
+    uninstall?: string;
+    version?: string;
+    // パッケージが VS Code 拡張機能として公開される前に実行されるスクリプト。
     "vscode:prepublish"?: string;
-    /**
-     * VS コード拡張機能のフックをアンインストールします。 VS
-     * コードから拡張機能を完全にアンインストールした時に実行されるスクリプトです。スクリプトは、拡張機能をアンインストールした後に VS コードを再起動 (シャット
-     * ダウンしてから起動) したときに実行されます。Node スクリプトのみがサポートされます。
-     */
+    // VS コード拡張機能のフックをアンインストールします。 VS コードから拡張機能を完全にアンインストールした時に実行されるスクリプトです。スクリプトは、拡張機能をアンインストールした後に VS コードを再起動 (シャットダウンしてから起動) したときに実行されます。Node スクリプトのみがサポートされます。
     "vscode:uninstall"?: string;
 }
 export interface Root
@@ -189,31 +220,19 @@ export interface Root
     name: string;
     description: string;
     version: string;
-    /**
-     * VS Code ギャラリーで拡張機能の分類に使用されるカテゴリ。
-     */
+    // VS Code ギャラリーで拡張機能の分類に使用されるカテゴリ。
     categories?: string[];
-    /**
-     * VS Code ギャラリーで使用される拡張機能の表示名。
-     */
+    // VS Code ギャラリーで使用される拡張機能の表示名。
     displayName?: string;
-    /**
-     * エンジンの互換性。
-     */
+    // エンジンの互換性。
     engines?: Engines;
-    /**
-     * VS Code マーケットプレースで使用されるバナー。
-     */
+    // VS Code マーケットプレースで使用されるバナー。
     galleryBanner?: GalleryBanner;
-    /**
-     * 128x128 ピクセルのアイコンへのパス。
-     */
+    // 128x128 ピクセルのアイコンへのパス。
     icon?: string;
-    /**
-     * VS Code 拡張機能の公開元。
-     */
+    // VS Code 拡張機能の公開元。
     publisher?: string;
     contributes: Contributes;
-    scripts?:   Scripts;
+    scripts?: Scripts;
 
 };
