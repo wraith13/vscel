@@ -1,10 +1,11 @@
 // ここの型情報は vscode.extensions.all.map(i => i.packageJSON) の為のモノで、これはオリジナルの package.json と微妙に異なっており
-// 実際のデータと `https://json.schemastore.org/package` と `vscode://schemas/vscode-extensions` を付き合わせたモノです。
+// 実際のデータとオリジナルの package.json のスキーマ情報( `https://json.schemastore.org/package` と `vscode://schemas/vscode-extensions` )
+// を参考に書き起こした型情報となります。
 
 export type PrimaryConfigurationType = "null" | "boolean" | "string" | "integer" | "number" | "array" | "object";
 export type ConfigurationType = PrimaryConfigurationType | PrimaryConfigurationType[];
 export type ConfigurationScope = "application" | "machine" | "window" | "resource" | "language-overridable" | "machine-overridable";
-export type LocalizableString = string | { value: string; original: string };
+export type LocalizableString = string | { value: string; original: string; };
 export interface ConfigurationBase
 {
     properties: { [key: string]: ConfigurationProperty };
@@ -36,14 +37,15 @@ export interface Configuration extends ConfigurationBase
 }
 export interface Command
 {
+    original?: string;
     command: string;
     title: LocalizableString;
     description?: string;
     category?: LocalizableString;
     icon?: string |
     {
-    dark: string;
-    light: string;
+        dark: string;
+        light: string;
     };
 }
 export interface Keybinding
@@ -130,72 +132,88 @@ export interface Color
     description?: string;
     defaults?:
     {
-    dark?: string;
-    light?: string;
-    highContrast?: string;
+        dark?: string;
+        light?: string;
+        highContrast?: string;
     };
-};
+}
 export interface Contributes
 {
-    configuration?: Configuration;
     configurationDefaults?: object;
-    viewsContainers?: unknown;
-    views?: unknown;
-    customEditors?: unknown[];
-    commands?: Command[];
-    keybindings?: Keybinding[];
-    menus?: Menus;
-    languages?: Language[];
+    configuration?: Configuration;
     jsonValidation?: JsonValidation;
-    taskDefinitions?: unknown[];
-    grammars?: Grammars[];
-    semanticTokenScopes?: SemanticTokenScope[];
-    breakpoints?: Breakpoint[];
+    commands?: Command[];
+    menus?: Menus;
     debuggers?: unknown[];
+    breakpoints?: Breakpoint[];
+    notebookProvider?: unknown[];
+    notebookOutputRenderer?: unknown[];
+    problemPatterns?: unknown[];
+    problemMatchers?: unknown[];
+    taskDefinitions?: unknown[];
+    terminal?: unknown;
+    viewsWelcome?: unknown[];
+    keybindings?: Keybinding[];
+    languages?: Language[];
+    codeActions?: unknown[];
+    documentation?: unknown;
+    customEditors?: unknown[];
     snippets?: Snippet[];
+    resourceLabelFormatters?: unknown[];
+    grammars?: Grammars[];
     colors?: Color[];
+    semanticTokenTypes?: unknown[];
+    semanticTokenModifiers?: unknown[];
+    semanticTokenScopes?: SemanticTokenScope[];
+    themes?: unknown[];
+    iconThemes?: unknown[];
+    productIconThemes?: unknown[];
+    localizations?: unknown[];
+    viewsContainers?: unknown[];
+    views?: unknown[];
+    remoteHelp?: unknown;
 }
-// エンジンの互換性。
-export interface Engines {
-    // VS Code 拡張機能の場合、拡張機能と互換性のある VS Code バージョンを指定します。* を指定することはできません。たとえば、^0.10.5 は最小の VS Code バージョン 0.10.5 との互換性を示します。
-    vscode?: string;
+export enum Theme
+{
+    "dark",
+    "light",
 }
-// VS Code マーケットプレースで使用されるバナー。
-export interface GalleryBanner {
-    // VS Code マーケットプレース ページ ヘッダー上のバナーの色。
-    color?: string;
-    // バナーで使用されるフォントの配色テーマ。
-    theme?: Theme;
-}
-// バナーで使用されるフォントの配色テーマ。
-export enum Theme {
-    Dark = "dark",
-    Light = "light",
+export enum Category
+{
+    "Programming Languages",
+    "Snippets",
+    "Linters",
+    "Themes",
+    "Debuggers",
+    "Other",
+    "Keymaps",
+    "Formatters",
+    "Extension Packs",
+    "SCM Providers",
+    "Azure",
+    "Language Packs",
+    "Data Science",
+    "Machine Learning",
+    "Visualization",
+    "Testing",
+    "Notebooks"
 }
 export interface Scripts
 {
     install?: string;
     postinstall?: string;
-    // Run AFTER the tarball has been generated and moved to its final destination.
     postpack?: string;
     postpublish?: string;
     postrestart?: string;
     poststart?: string;
     poststop?: string;
     posttest?: string;
-    // Run AFTER the package is uninstalled
     postuninstall?: string;
-    // Run AFTER bump the package version
     postversion?: string;
-    // Run BEFORE the package is installed
     preinstall?: string;
-    // run BEFORE a tarball is packed (on npm pack, npm publish, and when installing git dependencies)
     prepack?: string;
-    // Run both BEFORE the package is packed and published, and on local npm install without any arguments. This is run AFTER prepublish, but BEFORE prepublishOnly
     prepare?: string;
-    // Run BEFORE the package is published (Also run on local npm install without any arguments)
     prepublish?: string;
-    // Run BEFORE the package is prepared and packed, ONLY on npm publish
     prepublishOnly?: string;
     prerestart?: string;
     prestart?: string;
@@ -210,29 +228,66 @@ export interface Scripts
     test?: string;
     uninstall?: string;
     version?: string;
-    // パッケージが VS Code 拡張機能として公開される前に実行されるスクリプト。
     "vscode:prepublish"?: string;
-    // VS コード拡張機能のフックをアンインストールします。 VS コードから拡張機能を完全にアンインストールした時に実行されるスクリプトです。スクリプトは、拡張機能をアンインストールした後に VS コードを再起動 (シャットダウンしてから起動) したときに実行されます。Node スクリプトのみがサポートされます。
     "vscode:uninstall"?: string;
 }
 export interface Root
 {
     name: string;
+    displayName?: string;
     description: string;
     version: string;
-    // VS Code ギャラリーで拡張機能の分類に使用されるカテゴリ。
-    categories?: string[];
-    // VS Code ギャラリーで使用される拡張機能の表示名。
-    displayName?: string;
-    // エンジンの互換性。
-    engines?: Engines;
-    // VS Code マーケットプレースで使用されるバナー。
-    galleryBanner?: GalleryBanner;
-    // 128x128 ピクセルのアイコンへのパス。
-    icon?: string;
-    // VS Code 拡張機能の公開元。
     publisher?: string;
+    icon?: string;
+    galleryBanner?:
+    {
+        color?: string;
+        theme?: Theme;
+    };
+    homepage: string;
+    author?: string |
+    {
+        email?: string;
+        name: string;
+        url?: string;
+    };
+    bugs?: string |
+    {
+        email?: string;
+        url?: string;
+    };
+    repository?: string |
+    {
+        directory?: string;
+        type?: string;
+        url?: string;
+    };
+    engines?:
+    {
+        vscode?: string;
+    };
+    categories?: Category[];
+    keywords?: string[];
+    activationEvents: string[];
+    main?: string;
     contributes: Contributes;
     scripts?: Scripts;
-
-};
+    devDependencies?: { [key: string]: string };
+    dependencies?: { [key: string]: string };
+    uuid: string;
+    isBuiltin: boolean;
+    isUnderDevelopment: boolean;
+    id: string;
+    identifier:
+    {
+        value: string;
+        _lower: string;
+    };
+    extensionLocation:
+    {
+        $mid: number;
+        fsPath: string;
+        path: string;
+        scheme: string;
+    };
+}
