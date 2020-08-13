@@ -35,6 +35,11 @@ export interface Configuration extends ConfigurationBase
     type?: ConfigurationType;
     title: string;
 }
+export interface JsonValidation
+{
+    fileMatch: string;
+    url: string;
+}
 export interface Command
 {
     original?: string;
@@ -47,13 +52,6 @@ export interface Command
         dark: string;
         light: string;
     };
-}
-export interface Keybinding
-{
-    key: string;
-    mac?: string;
-    command: string;
-    when?: string;
 }
 export interface MenuItem
 {
@@ -90,6 +88,39 @@ export interface Menus
     "timeline/title"?: MenuItem[];
     "timeline/item/context"?: MenuItem[];
 }
+export interface Debugger
+{
+    type: string;
+    label: string;
+    program: string;
+    args: unknown[];
+    runtime: string;
+    runtimeArgs: unknown[];
+    variables: object;
+    initialConfigurations: unknown[] | string;
+    languages: unknown[];
+    configurationSnippets: unknown[];
+    configurationAttributes: object;
+    windows:
+    {
+        runtime: string;
+    };
+    "osx":
+    {
+        runtime: string;
+    };
+    "linux":
+    {
+        runtime: string;
+    };
+}
+export interface Keybinding
+{
+    key: string;
+    mac?: string;
+    command: string;
+    when?: string;
+}
 export interface Language
 {
     id: string;
@@ -98,11 +129,6 @@ export interface Language
     firstLine?: string;
     mimetypes?: string[];
     configuration?: string;
-}
-export interface JsonValidation
-{
-    fileMatch: string;
-    url: string;
 }
 export interface Grammars
 {
@@ -144,7 +170,7 @@ export interface Contributes
     jsonValidation?: JsonValidation;
     commands?: Command[];
     menus?: Menus;
-    debuggers?: unknown[];
+    debuggers?: Debugger[];
     breakpoints?: Breakpoint[];
     notebookProvider?: unknown[];
     notebookOutputRenderer?: unknown[];
