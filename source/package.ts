@@ -39,7 +39,7 @@ export interface Configuration extends ConfigurationBase
 }
 export interface JsonValidation
 {
-    fileMatch: string;
+    fileMatch: string | string[];
     url: string;
 }
 export interface Command
@@ -49,6 +49,7 @@ export interface Command
     title: LocalizableString;
     description?: string;
     category?: LocalizableString;
+    enablement?: string;
     icon?: string |
     {
         dark: string;
@@ -58,9 +59,9 @@ export interface Command
 export interface MenuItem
 {
     command: string;
-    when: string;
-    alt: string;
-    group: string;
+    when?: string;
+    alt?: string;
+    group?: string;
 }
 export interface Menus
 {
@@ -120,6 +121,23 @@ export interface Breakpoint
 {
     language?: string;
 }
+export interface NotebookProvider
+{
+    viewType: string;
+    displayName: string;
+    selector:
+    {
+        filenamePattern: string;
+        excludeFileNamePattern: string;
+    }[];
+    priority?: "default" | "option";
+}
+export interface NotebookOutputRenderer
+{
+    viewType: string;
+    displayName: string;
+    mimeTypes: string[];
+}
 export interface Keybinding
 {
     key: string;
@@ -169,13 +187,13 @@ export interface Contributes
 {
     configurationDefaults?: object;
     configuration?: Configuration;
-    jsonValidation?: JsonValidation;
-    commands?: Command[];
+    jsonValidation?: JsonValidation[];
+    commands?: Command | Command[];
     menus?: Menus;
     debuggers?: Debugger[];
     breakpoints?: Breakpoint[];
-    notebookProvider?: unknown[];
-    notebookOutputRenderer?: unknown[];
+    notebookProvider?: NotebookProvider[];
+    notebookOutputRenderer?: NotebookOutputRenderer[];
     problemPatterns?: unknown[];
     problemMatchers?: unknown[];
     taskDefinitions?: unknown[];
