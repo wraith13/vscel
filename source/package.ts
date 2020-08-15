@@ -26,6 +26,8 @@ export interface ConfigurationProperty extends ConfigurationBase
     enumDescriptions?: string[];
     markdownDescription?: string;
     markdownEnumDescriptions?: string[];
+    deprecationMessage?: string;
+    markdownDeprecationMessage?: string;
     tags?: string[];
 }
 export interface Configuration extends ConfigurationBase
@@ -114,6 +116,10 @@ export interface Debugger
         runtime: string;
     };
 }
+export interface Breakpoint
+{
+    language?: string;
+}
 export interface Keybinding
 {
     key: string;
@@ -142,10 +148,6 @@ export interface SemanticTokenScope
 {
     language?: string;
     scopes?: { [key: string]: string[] };
-}
-export interface Breakpoint
-{
-    language?: string;
 }
 export interface Snippet
 {
