@@ -88,24 +88,24 @@ export interface Menus
     "explorer/context"?: (MenuItem | MenuItemSub)[];
     "editor/title/context"?: (MenuItem | MenuItemSub)[];
     "debug/callstack/context"?: (MenuItem | MenuItemSub)[];
-    "debug/toolBar"?: MenuItem[];
+    "debug/toolBar"?: (MenuItem | MenuItemSub)[];
     "menuBar/webNavigation"?: MenuItem[];
-    "scm/title"?: MenuItem[];
-    "scm/sourceControl"?: MenuItem[];
-    "scm/resourceGroup/context"?: MenuItem[];
-    "scm/resourceState/context"?: MenuItem[];
-    "scm/resourceFolder/context"?: MenuItem[];
-    "scm/change/title"?: MenuItem[];
-    "view/title"?: MenuItem[];
-    "view/item/context"?: MenuItem[];
-    "comments/commentThread/title"?: MenuItem[];
+    "scm/title"?: (MenuItem | MenuItemSub)[];
+    "scm/sourceControl"?: (MenuItem | MenuItemSub)[];
+    "scm/resourceState/context"?: (MenuItem | MenuItemSub)[];
+    "scm/resourceFolder/context"?: (MenuItem | MenuItemSub)[];
+    "scm/resourceGroup/context"?: (MenuItem | MenuItemSub)[];
+    "scm/change/title"?: (MenuItem | MenuItemSub)[];
+    "view/title"?: (MenuItem | MenuItemSub)[];
+    "view/item/context"?: (MenuItem | MenuItemSub)[];
+    "comments/commentThread/title"?: (MenuItem | MenuItemSub)[];
     "comments/commentThread/context"?: MenuItem[];
-    "comments/comment/title"?: MenuItem[];
+    "comments/comment/title"?: (MenuItem | MenuItemSub)[];
     "comments/comment/context"?: MenuItem[];
-    "notebook/cell/title"?: MenuItem[];
-    "extension/context"?: MenuItem[];
-    "timeline/title"?: MenuItem[];
-    "timeline/item/context"?: MenuItem[];
+    "notebook/cell/title"?: (MenuItem | MenuItemSub)[];
+    "extension/context"?: (MenuItem | MenuItemSub)[];
+    "timeline/title"?: (MenuItem | MenuItemSub)[];
+    "timeline/item/context"?: (MenuItem | MenuItemSub)[];
 }
 export interface Debugger
 {
