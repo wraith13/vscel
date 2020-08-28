@@ -56,6 +56,16 @@ export interface Command
         light: string;
     };
 }
+export interface SubmenuItem
+{
+    kd: string;
+    label: string;
+    icon?: string |
+    {
+        dark: string;
+        light: string;
+    };
+}
 export interface MenuItem
 {
     command: string;
@@ -63,15 +73,21 @@ export interface MenuItem
     alt?: string;
     group?: string;
 }
+export interface MenuItemSub
+{
+    submenu: string;
+    when?: string;
+    group?: string;
+}
 export interface Menus
 {
     "commandPalette"?: MenuItem[];
     "touchBar"?: MenuItem[];
-    "editor/title"?: MenuItem[];
-    "editor/context"?: MenuItem[];
-    "explorer/context"?: MenuItem[];
-    "editor/title/context"?: MenuItem[];
-    "debug/callstack/context"?: MenuItem[];
+    "editor/title"?: (MenuItem | MenuItemSub)[];
+    "editor/context"?: (MenuItem | MenuItemSub)[];
+    "explorer/context"?: (MenuItem | MenuItemSub)[];
+    "editor/title/context"?: (MenuItem | MenuItemSub)[];
+    "debug/callstack/context"?: (MenuItem | MenuItemSub)[];
     "debug/toolBar"?: MenuItem[];
     "menuBar/webNavigation"?: MenuItem[];
     "scm/title"?: MenuItem[];
@@ -189,6 +205,7 @@ export interface Contributes
     configuration?: Configuration;
     jsonValidation?: JsonValidation[];
     commands?: Command | Command[];
+    submenus?: SubmenuItem[];
     menus?: Menus;
     debuggers?: Debugger[];
     breakpoints?: Breakpoint[];
@@ -226,23 +243,23 @@ export enum Theme
 }
 export enum Category
 {
-    "Programming Languages",
-    "Snippets",
-    "Linters",
-    "Themes",
-    "Debuggers",
-    "Other",
-    "Keymaps",
-    "Formatters",
-    "Extension Packs",
-    "SCM Providers",
     "Azure",
-    "Language Packs",
     "Data Science",
+    "Debuggers",
+    "Extension Packs",
+    "Formatters",
+    "Keymaps",
+    "Language Packs",
+    "Linters",
     "Machine Learning",
-    "Visualization",
+    "Notebooks",
+    "Programming Languages",
+    "SCM Providers",
+    "Snippets",
+    "Themes",
     "Testing",
-    "Notebooks"
+    "Visualization",
+    "Other"
 }
 export interface Scripts
 {
