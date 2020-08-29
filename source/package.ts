@@ -154,6 +154,30 @@ export interface NotebookOutputRenderer
     displayName: string;
     mimeTypes: string[];
 }
+export interface ProblemPatternCore
+{
+    regexp: string;
+    kind: string;
+    file: number;
+    location: number;
+    line: number;
+    column: number;
+    endLine: number;
+    endColumn: number;
+    severity: number;
+    code: number;
+    message: number;
+    loop: boolean;
+}
+export interface ProblemPatternFlat extends ProblemPatternCore
+{
+    name: string;
+}
+export interface ProblemPatternArray
+{
+    name: string;
+    patterns: ProblemPatternCore[];
+}
 export interface Keybinding
 {
     key: string;
@@ -211,7 +235,7 @@ export interface Contributes
     breakpoints?: Breakpoint[];
     notebookProvider?: NotebookProvider[];
     notebookOutputRenderer?: NotebookOutputRenderer[];
-    problemPatterns?: unknown[];
+    problemPatterns?: (ProblemPatternFlat | ProblemPatternArray)[];
     problemMatchers?: unknown[];
     taskDefinitions?: unknown[];
     terminal?: unknown;
