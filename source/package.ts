@@ -178,6 +178,39 @@ export interface ProblemPatternArray
     name: string;
     patterns: ProblemPatternCore[];
 }
+export type ProblemSeverity = "error" | "warning" | "info";
+export type ProblemApplyTarget = "allDocuments" | "openDocuments" | "closedDocuments";
+export type ProblemFileLocation = "absolute" | "relative" | "autoDetect";
+export interface ProblemMatcherPattern
+{
+    regexp: string;
+    file: number;
+}
+export interface ProblemMatcherBackground
+{
+    beginsPattern: string | ProblemMatcherPattern;
+    endsPattern: string | ProblemMatcherPattern;
+}
+export interface ProblemMatcherWatching
+{
+    activeOnStart: boolean;
+    beginsPattern: string | ProblemMatcherPattern;
+    endsPattern: string | ProblemMatcherPattern;
+}
+export interface ProblemMatcher
+{
+    base: string;
+    owner: string;
+    source: string;
+    severity: ProblemSeverity;
+    applyTo: ProblemApplyTarget;
+    pattern: string | ProblemPatternCore | ProblemPatternCore[];
+    fileLocation: ProblemFileLocation | string[];
+    background: ProblemMatcherBackground;
+    watching: ProblemMatcherWatching;
+    name: string;
+    label: string;
+}
 export interface Keybinding
 {
     key: string;
@@ -236,7 +269,7 @@ export interface Contributes
     notebookProvider?: NotebookProvider[];
     notebookOutputRenderer?: NotebookOutputRenderer[];
     problemPatterns?: (ProblemPatternFlat | ProblemPatternArray)[];
-    problemMatchers?: unknown[];
+    problemMatchers?: ProblemMatcher[];
     taskDefinitions?: unknown[];
     terminal?: unknown;
     viewsWelcome?: unknown[];
