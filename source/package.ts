@@ -211,6 +211,13 @@ export interface ProblemMatcher
     name: string;
     label: string;
 }
+export interface TaskDefinition
+{
+    type: string;
+    required: string[];
+    properties: object; // "http://json-schema.org/draft-07/schema#"
+    when: string;
+}
 export interface Keybinding
 {
     key: string;
@@ -270,7 +277,7 @@ export interface Contributes
     notebookOutputRenderer?: NotebookOutputRenderer[];
     problemPatterns?: (ProblemPatternFlat | ProblemPatternArray)[];
     problemMatchers?: ProblemMatcher[];
-    taskDefinitions?: unknown[];
+    taskDefinitions?: TaskDefinition[];
     terminal?: unknown;
     viewsWelcome?: unknown[];
     keybindings?: Keybinding[];
