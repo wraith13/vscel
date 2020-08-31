@@ -218,6 +218,15 @@ export interface TaskDefinition
     properties: object; // "http://json-schema.org/draft-07/schema#"
     when: string;
 }
+export interface TerminalType
+{
+    command: string;
+    title: string;
+}
+export interface Terminal
+{
+    types: TerminalType[];
+}
 export interface Keybinding
 {
     key: string;
@@ -278,7 +287,7 @@ export interface Contributes
     problemPatterns?: (ProblemPatternFlat | ProblemPatternArray)[];
     problemMatchers?: ProblemMatcher[];
     taskDefinitions?: TaskDefinition[];
-    terminal?: unknown;
+    terminal?: Terminal;
     viewsWelcome?: unknown[];
     keybindings?: Keybinding[];
     languages?: Language[];
