@@ -227,11 +227,21 @@ export interface Terminal
 {
     types: TerminalType[];
 }
+export type ViewsWelcomeView = "explorer" | "debug" | "scm";
+export interface ViewsWelcome
+{
+    view: ViewsWelcomeView;
+    contents: string;
+    when?: string;
+}
 export interface Keybinding
 {
+    command: string;
+    args: unknown;
     key: string;
     mac?: string;
-    command: string;
+    linux?: string;
+    win?: string;
     when?: string;
 }
 export interface Language
@@ -288,8 +298,8 @@ export interface Contributes
     problemMatchers?: ProblemMatcher[];
     taskDefinitions?: TaskDefinition[];
     terminal?: Terminal;
-    viewsWelcome?: unknown[];
-    keybindings?: Keybinding[];
+    viewsWelcome?: ViewsWelcome[];
+    keybindings?: Keybinding | Keybinding[];
     languages?: Language[];
     codeActions?: unknown[];
     documentation?: unknown;
