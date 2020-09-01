@@ -247,11 +247,24 @@ export interface Keybinding
 export interface Language
 {
     id: string;
-    extensions?: string[];
     aliases?: string[];
-    firstLine?: string;
+    extensions?: string[];
+    filenames?: string[];
+    filenamePatterns?: string[];
     mimetypes?: string[];
+    firstLine?: string;
     configuration?: string;
+}
+export interface CodeActionAction
+{
+    kind: string;
+    title: string;
+    description?: string;
+}
+export interface CodeAction
+{
+    languages: string[];
+    actions: CodeActionAction;
 }
 export interface Grammars
 {
@@ -301,7 +314,7 @@ export interface Contributes
     viewsWelcome?: ViewsWelcome[];
     keybindings?: Keybinding | Keybinding[];
     languages?: Language[];
-    codeActions?: unknown[];
+    codeActions?: CodeAction[];
     documentation?: unknown;
     customEditors?: unknown[];
     snippets?: Snippet[];
