@@ -266,6 +266,28 @@ export interface CodeAction
     languages: string[];
     actions: CodeActionAction;
 }
+export interface DocumentationRefactoring
+{
+    title: string;
+    when: string;
+    command: string;
+}
+export interface Documentation
+{
+    refactoring: DocumentationRefactoring;
+}
+export interface CustomEditorSelector
+{
+    filenamePattern: string;
+}
+type CustomEditorPriority = "default" | "option";
+export interface CustomEditor
+{
+    viewType: string;
+    displayName: string;
+    selector: CustomEditorSelector[];
+    priority: CustomEditorPriority;
+}
 export interface Grammars
 {
     language?: string;
@@ -315,8 +337,8 @@ export interface Contributes
     keybindings?: Keybinding | Keybinding[];
     languages?: Language[];
     codeActions?: CodeAction[];
-    documentation?: unknown;
-    customEditors?: unknown[];
+    documentation?: Documentation;
+    customEditors?: CustomEditor[];
     snippets?: Snippet[];
     resourceLabelFormatters?: unknown[];
     grammars?: Grammars[];
