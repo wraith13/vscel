@@ -288,6 +288,26 @@ export interface CustomEditor
     selector: CustomEditorSelector[];
     priority: CustomEditorPriority;
 }
+export interface Snippet
+{
+    language?: string;
+    path?: string;
+}
+export interface ResourceLabelFormatterFormatting
+{
+    label: string;
+    separator: string;
+    stripPathStartingSeparator: boolean;
+    tildify: boolean;
+    workspaceSuffix: string;
+}
+export interface ResourceLabelFormatter
+{
+    scheme: string;
+    authority: string;
+    formatting: ResourceLabelFormatterFormatting;
+
+}
 export interface Grammars
 {
     language?: string;
@@ -300,11 +320,6 @@ export interface SemanticTokenScope
 {
     language?: string;
     scopes?: { [key: string]: string[] };
-}
-export interface Snippet
-{
-    language?: string;
-    path?: string;
 }
 export interface Color
 {
@@ -340,7 +355,7 @@ export interface Contributes
     documentation?: Documentation;
     customEditors?: CustomEditor[];
     snippets?: Snippet[];
-    resourceLabelFormatters?: unknown[];
+    resourceLabelFormatters?: ResourceLabelFormatter[];
     grammars?: Grammars[];
     colors?: Color[];
     semanticTokenTypes?: unknown[];
