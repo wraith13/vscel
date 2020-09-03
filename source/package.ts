@@ -800,10 +800,29 @@ export interface Color
         highContrast?: ColorIdentifier | ColorValue;
     };
 }
+export interface SemanticTokenType
+{
+    id: string;
+    superType: string;
+    description: string;
+}
+export interface SemanticTokenModifier
+{
+    id: string;
+    description: string;
+}
 export interface SemanticTokenScope
 {
-    language?: string;
-    scopes?: { [key: string]: string[] };
+    language: string;
+    scopes: { [key: string]: string[] };
+}
+export type UiTheme = "vs" | "vs-dark" | "hc-black";
+export interface Theme
+{
+    id?: string;
+    label?: string;
+    uiTheme: UiTheme;
+    path: string;
 }
 export interface Contributes
 {
@@ -831,10 +850,10 @@ export interface Contributes
     resourceLabelFormatters?: ResourceLabelFormatter[];
     grammars?: Grammars[];
     colors?: Color[];
-    semanticTokenTypes?: unknown[];
-    semanticTokenModifiers?: unknown[];
+    semanticTokenTypes?: SemanticTokenType[];
+    semanticTokenModifiers?: SemanticTokenModifier[];
     semanticTokenScopes?: SemanticTokenScope[];
-    themes?: unknown[];
+    themes?: Theme[];
     iconThemes?: unknown[];
     productIconThemes?: unknown[];
     localizations?: unknown[];
@@ -842,7 +861,7 @@ export interface Contributes
     views?: unknown[];
     remoteHelp?: unknown;
 }
-export enum Theme
+export enum ThemeEnum
 {
     "dark",
     "light",
@@ -911,7 +930,7 @@ export interface Root
     galleryBanner?:
     {
         color?: string;
-        theme?: Theme;
+        theme?: ThemeEnum;
     };
     homepage: string;
     author?: string |
