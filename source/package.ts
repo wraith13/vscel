@@ -836,6 +836,35 @@ export interface ProductIconTheme
     label?: string;
     path: string;
 }
+export interface LocalizationTranslation
+{
+    id: string;
+    path: string;
+}
+export interface Localization
+{
+    languageId: string;
+    languageName: string;
+    localizedLanguageName: string;
+    translations: LocalizationTranslation[];
+}
+export interface ViewsContainerActivitybar
+{
+    id: string;
+    title: string;
+    icon: string;
+}
+export interface ViewsContainerPanel
+{
+    id: string;
+    title: string;
+    icon: string;
+}
+export interface ViewsContainer
+{
+    activitybar: ViewsContainerActivitybar[];
+    panel: ViewsContainerPanel[];
+}
 export interface Contributes
 {
     configurationDefaults?: object;
@@ -868,8 +897,8 @@ export interface Contributes
     themes?: Theme[];
     iconThemes?: IconTheme[];
     productIconThemes?: ProductIconTheme[];
-    localizations?: unknown[];
-    viewsContainers?: unknown[];
+    localizations?: Localization[];
+    viewsContainers?: ViewsContainer[];
     views?: unknown[];
     remoteHelp?: unknown;
 }
