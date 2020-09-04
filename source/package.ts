@@ -824,6 +824,18 @@ export interface Theme
     uiTheme: UiTheme;
     path: string;
 }
+export interface IconTheme
+{
+    id: string;
+    label?: string;
+    path: string;
+}
+export interface ProductIconTheme
+{
+    id: string;
+    label?: string;
+    path: string;
+}
 export interface Contributes
 {
     configurationDefaults?: object;
@@ -854,8 +866,8 @@ export interface Contributes
     semanticTokenModifiers?: SemanticTokenModifier[];
     semanticTokenScopes?: SemanticTokenScope[];
     themes?: Theme[];
-    iconThemes?: unknown[];
-    productIconThemes?: unknown[];
+    iconThemes?: IconTheme[];
+    productIconThemes?: ProductIconTheme[];
     localizations?: unknown[];
     viewsContainers?: unknown[];
     views?: unknown[];
