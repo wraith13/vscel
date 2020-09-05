@@ -865,6 +865,66 @@ export interface ViewsContainer
     activitybar: ViewsContainerActivitybar[];
     panel: ViewsContainerPanel[];
 }
+export type ViewVisibility = "visible" | "hidden" | "collapsed";
+export interface ViewExplorer
+{
+    id: string;
+    name: string;
+    when: string;
+    icon: string;
+    contextualTitle: string;
+    visibility: ViewVisibility;
+}
+export interface ViewDebug
+{
+    id: string;
+    name: string;
+    when: string;
+    icon: string;
+    contextualTitle: string;
+    visibility: ViewVisibility;
+}
+export interface ViewScm
+{
+    id: string;
+    name: string;
+    when: string;
+    icon: string;
+    contextualTitle: string;
+    visibility: ViewVisibility;
+}
+export interface ViewTest
+{
+    id: string;
+    name: string;
+    when: string;
+    icon: string;
+    contextualTitle: string;
+    visibility: ViewVisibility;
+}
+export interface ViewRemote
+{
+    id: string;
+    name: string;
+    when: string;
+    group: string;
+    remoteName: string | string[];
+}
+export interface View
+{
+    explorer: ViewExplorer[];
+    debug: ViewDebug[];
+    scm: ViewScm[];
+    test: ViewTest[];
+    remote: ViewRemote[];
+}
+export interface RemoteHelp
+{
+    getStarted: string;
+    documentation: string;
+    feedback: string;
+    issues: string;
+}
 export interface Contributes
 {
     configurationDefaults?: object;
@@ -899,8 +959,8 @@ export interface Contributes
     productIconThemes?: ProductIconTheme[];
     localizations?: Localization[];
     viewsContainers?: ViewsContainer[];
-    views?: unknown[];
-    remoteHelp?: unknown;
+    views?: View;
+    remoteHelp?: RemoteHelp;
 }
 export enum ThemeEnum
 {
