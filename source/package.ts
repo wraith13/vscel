@@ -1020,19 +1020,36 @@ export interface Scripts
     "vscode:prepublish"?: string;
     "vscode:uninstall"?: string;
 }
+export interface Badge
+{
+    url: string;
+    href: string;
+    description: string;
+}
+export type MarkdownEnum = "github" | "standard";
 export interface Root
 {
-    name: string;
-    displayName?: string;
-    description: string;
-    version: string;
+    engines:
+    {
+        vscode: string;
+    };
     publisher?: string;
-    icon?: string;
+    displayName?: string;
+    categories?: Category[];
     galleryBanner?:
     {
         color?: string;
         theme?: ThemeEnum;
     };
+    contributes: Contributes;
+    preview: boolean;
+    activationEvents: string[];
+    markdown: MarkdownEnum;
+    badges: Badge[];
+    name: string;
+    description: string;
+    version: string;
+    icon?: string;
     homepage: string;
     author?: string |
     {
@@ -1051,15 +1068,8 @@ export interface Root
         type?: string;
         url?: string;
     };
-    engines?:
-    {
-        vscode?: string;
-    };
-    categories?: Category[];
     keywords?: string[];
-    activationEvents: string[];
     main?: string;
-    contributes: Contributes;
     scripts?: Scripts;
     devDependencies?: { [key: string]: string };
     dependencies?: { [key: string]: string };
