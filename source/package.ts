@@ -1027,6 +1027,7 @@ export interface Badge
     description: string;
 }
 export type MarkdownEnum = "github" | "standard";
+export type ExtensionKindEnum = "ui" | "workspace" | "web";
 export interface Root
 {
     engines:
@@ -1044,8 +1045,12 @@ export interface Root
     contributes: Contributes;
     preview: boolean;
     activationEvents: string[];
-    markdown: MarkdownEnum;
     badges: Badge[];
+    markdown: MarkdownEnum;
+    qna: string | false;
+    extensionDependencies: string[];
+    extensionPack: string[];
+    extensionKind: ExtensionKindEnum[];
     name: string;
     description: string;
     version: string;
