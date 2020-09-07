@@ -31,13 +31,13 @@ export class Root<PropertiesT extends PropertiesBaseType>
     (
         key: keyof PropertiesT & string,
         validator?: (value: valueT) => boolean
-    ) => new Entry(this.properties, key, validator);
+    ) => new Entry(this.properties, key, validator)
     public makeMapEntry = <ObjectT>
     (
         key: keyof PropertiesT & string,
         mapObject: ObjectT
-    ) => new MapEntry(this.properties, key, mapObject);
-};
+    ) => new MapEntry(this.properties, key, mapObject)
+}
 export class Entry<PropertiesT extends PropertiesBaseType, valueT>
 {
     public defaultValue: valueT;
@@ -77,7 +77,7 @@ export class Entry<PropertiesT extends PropertiesBaseType, valueT>
             }
         }
         return result;
-    };
+    }
     cache = new Cache
     (
         (languageId: string): valueT =>
