@@ -1,12 +1,6 @@
-import * as Cache from "./cache";
-import * as Config from "./config";
-import * as Locale from "./locale";
-import * as Comparer from "./comparer";
-import * as Package from "./package";
-import * as Menu from "./menu";
-export const cache = Cache;
-export const config = Config;
-export const locale = Locale;
-export const comparer = Comparer;
-export const packageJson = Package;
-export const menu = Menu;
+export * as cache from "./cache";
+export * as config from "./config";
+export * as locale from "./locale";
+export * as comparer from "./comparer";
+export * as packageJson from "./package";
+export * as menu from "./menu";
