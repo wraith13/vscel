@@ -77,7 +77,10 @@ export const showQuickPick = async <T extends CommandMenuItem>
     }
     else
     {
-        await apply(options ?.rollback);
+        if (options?.preview ?? true)
+        {
+            await apply(options ?.rollback);
+        }
     }
     return result;
 };
