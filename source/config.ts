@@ -22,22 +22,6 @@ interface PackageJsonConfiguration<PropertiesT extends PropertiesBaseType>
 {
     properties: PropertiesT;
 }
-export const makeRoot = <PropertiesT extends PropertiesBaseType>(packageJson: PackageJson<PropertiesT>) =>
-    new Root(packageJson.contributes.configuration[0].properties);
-export class Root<PropertiesT extends PropertiesBaseType>
-{
-    constructor(public properties: PropertiesT) { }
-    public makeEntry = <valueT>
-    (
-        key: keyof PropertiesT & string,
-        validator?: (value: valueT) => boolean
-    ) => new Entry(this.properties, key, validator)
-    public makeMapEntry = <ObjectT>
-    (
-        key: keyof PropertiesT & string,
-        mapObject: ObjectT
-    ) => new MapEntry(this.properties, key, mapObject)
-}
 export class Entry<PropertiesT extends PropertiesBaseType, valueT>
 {
     public defaultValue: valueT;
@@ -134,3 +118,26 @@ export class MapEntry<PropertiesT extends PropertiesBaseType, ObjectT>
 }
 export const makeEnumValidator = <ObjectT>(mapObject: ObjectT): (value: keyof ObjectT) => boolean => (value: keyof ObjectT): boolean => 0 <= Object.keys(mapObject).indexOf(value.toString());
 export const stringArrayValidator = (value: string[]) => "[object Array]" === Object.prototype.toString.call(value) && value.map(i => "string" === typeof i).reduce((a, b) => a && b, true);
+export type IEntry<PropertiesT extends PropertiesBaseType, valueT> = Entry<PropertiesT, valueT> | MapEntry<PropertiesT, valueT>;
+export class Root<PropertiesT extends PropertiesBaseType>
+{
+    constructor(public properties: PropertiesT) { }
+    public makeEntry = <valueT>
+    (
+        key: keyof PropertiesT & string,
+        validator?: (value: valueT) => boolean
+    ) => this.register(new Entry(this.properties, key, validator))
+    public makeMapEntry = <ObjectT>
+    (
+        key: keyof PropertiesT & string,
+        mapObject: ObjectT
+    ) => this.register(new MapEntry(this.properties, key, mapObject))
+    public entries = <IEntry<PropertiesT, unknown>[]>[];
+    private register = <valueT>(entry: IEntry<PropertiesT, valueT>) =>
+    {
+        this.entries.push(<IEntry<PropertiesT, unknown>>entry);
+        return entry;
+    }
+}
+export const makeRoot = <PropertiesT extends PropertiesBaseType>(packageJson: PackageJson<PropertiesT>) =>
+    new Root(packageJson.contributes.configuration[0].properties);
