@@ -133,9 +133,9 @@ export class Root<PropertiesT extends PropertiesBaseType>
         mapObject: ObjectT
     ) => this.register(new MapEntry(this.properties, key, mapObject))
     public entries = <IEntry<PropertiesT, unknown>[]>[];
-    private register = <valueT>(entry: IEntry<PropertiesT, valueT>) =>
+    private register = <valueT extends IEntry<PropertiesT, any>>(entry: valueT): valueT =>
     {
-        this.entries.push(<IEntry<PropertiesT, unknown>>entry);
+        this.entries.push(entry);
         return entry;
     }
 }
