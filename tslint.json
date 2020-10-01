@@ -6,7 +6,6 @@
 		"no-unused-variable": true,
 		"curly": true,
 		"class-name": true,
-		"semicolon": true,
 		"triple-equals": true
 	}
 }

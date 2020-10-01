@@ -20,5 +20,7 @@ export class Locale<LocaleEntryType extends LocaleEntry>
     public string = (key : string) : string => this.localeTable[key] || key;
     public map = (key : keyof LocaleEntryType & string) : string => this.string(key);
     public typeableMap = (key : keyof LocaleEntryType & string) : string =>
-        this.isTypealbeLocale ? this.string(key): `${this.string(key)} ( ${this.basicLocale[key]} )`;
+        this.isTypealbeLocale ?
+            this.string(key):
+            `${this.string(key)} ( ${this.basicLocale[key]} )`;
 }
