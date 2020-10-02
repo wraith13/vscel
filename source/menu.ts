@@ -13,6 +13,7 @@ export interface QuickPickOptions extends vscode.QuickPickOptions
     debug?: boolean;
     preview?: boolean; // default: true
     command?: <CommandMenuItemEx extends CommandMenuItem>(selected: CommandMenuItemEx) => Promise<unknown>;
+    onCancel?: () => Promise<unknown>
 }
 export const showQuickPick = async <T extends CommandMenuItem>
 (
@@ -77,7 +78,7 @@ export const showQuickPick = async <T extends CommandMenuItem>
         await apply(result.command) || await apply(result.preview);
         if (options?.command)
         {
-            options?.command(result);
+            await options?.command(result);
         }
     }
     else
@@ -85,6 +86,10 @@ export const showQuickPick = async <T extends CommandMenuItem>
         if (options?.preview ?? true)
         {
             await apply(options ?.rollback);
+        }
+        if (options?.onCancel)
+        {
+            await options?.onCancel();
         }
     }
     return result;
