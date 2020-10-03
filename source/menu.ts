@@ -6,19 +6,19 @@ export interface CommandMenuItem extends vscode.QuickPickItem
     command?: () => Promise<unknown>;
     tags?: string[];
 }
-export interface QuickPickOptions extends vscode.QuickPickOptions
+export interface QuickPickOptions<CommandMenuItemEx extends CommandMenuItem> extends vscode.QuickPickOptions
 {
     rollback?: () => Promise<unknown>;
     strictRollback?: () => Promise<unknown>;
     debug?: boolean;
     preview?: boolean; // default: true
-    command?: <CommandMenuItemEx extends CommandMenuItem>(selected: CommandMenuItemEx) => Promise<unknown>;
+    command?: (selected: CommandMenuItemEx) => Promise<unknown>;
     onCancel?: () => Promise<unknown>
 }
 export const showQuickPick = async <T extends CommandMenuItem>
 (
     items: T[] | Thenable<T[]>,
-    options?: QuickPickOptions,
+    options?: QuickPickOptions<T>,
     token?: vscode.CancellationToken
 ) =>
 {
