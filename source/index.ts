@@ -1,3 +1,4 @@
+export * as base from "./base";
 export * as cache from "./cache";
 export * as config from "./config";
 export * as locale from "./locale";
