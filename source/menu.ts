@@ -94,3 +94,16 @@ export const showQuickPick = async <T extends CommandMenuItem>
     }
     return result;
 };
+export interface InputBoxOptions extends vscode.InputBoxOptions
+{
+    command?: (input: string) => Promise<unknown>;
+}
+export const showInputBox = async (options?: InputBoxOptions, token?: vscode.CancellationToken) =>
+{
+    const result = await vscode.window.showInputBox(options, token);
+    if (undefined !== result && options?.command)
+    {
+        await options?.command(result);
+    }
+    return result;
+}
