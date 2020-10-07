@@ -101,12 +101,12 @@ export interface InputBoxOptions extends vscode.InputBoxOptions
     command?: (input: string) => Promise<unknown>;
     onCancel?: () => Promise<unknown>
 }
-export const showInputBox = async (options?: InputBoxOptions, token?: vscode.CancellationToken) =>
+export const showInputBox = async <T extends InputBoxOptions>(options?: T, token?: vscode.CancellationToken) =>
 {
-    const vscodeOptions = base.simplyDeepCopy(options ?? { });
-    const preview = vscodeOptions.preview;
-    const command = vscodeOptions.command;
-    const onCancel = vscodeOptions.onCancel;
+    const preview = options?.preview;
+    const command = options?.command;
+    const onCancel = options?.onCancel;
+    const vscodeOptions = base.simplyDeepCopy(options ?? <T>{ });
     vscodeOptions.preview = undefined;
     vscodeOptions.command = undefined;
     vscodeOptions.onCancel = undefined;
