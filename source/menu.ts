@@ -23,6 +23,13 @@ export const showQuickPick = async <T extends CommandMenuItem>
     token?: vscode.CancellationToken
 ) =>
 {
+    const vscodeOptions = base.simplyDeepCopy(options ?? <QuickPickOptions<T>>{ });
+    vscodeOptions.rollback = undefined;
+    vscodeOptions.strictRollback = undefined;
+    vscodeOptions.debug = undefined;
+    vscodeOptions.preview = undefined;
+    vscodeOptions.command = undefined;
+    vscodeOptions.onCancel = undefined;
     let lastPreview = options ?.strictRollback ?? options ?.rollback;
     const apply = async (method: (() => Promise<unknown>) | undefined) =>
     {
@@ -66,9 +73,10 @@ export const showQuickPick = async <T extends CommandMenuItem>
                         // tslint:disable-next-line: no-unused-expression
                         await apply(item?.preview) || await apply(options?.rollback);
                     }
+                    return options?.onDidSelectItem?.(item);
                 }
             },
-            options ?? { },
+            vscodeOptions,
         ),
         token
     );
