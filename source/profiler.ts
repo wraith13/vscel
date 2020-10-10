@@ -1,4 +1,6 @@
-const getTicks = () => new Date().getTime();
+export const getTicks = () => new Date().getTime();
+export const roundCenti = (value : number) : number => Math.round(value *100) /100;
+export const percentToDisplayString = (value : number, locales?: string | string[]) : string =>`${roundCenti(value).toLocaleString(locales, { style: "percent" })}`;
 let profileScore: { [scope: string]: number } = { };
 let entryStack: ProfileEntry[] = [ ];
 let isProfiling = false;
