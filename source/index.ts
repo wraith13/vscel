@@ -6,3 +6,4 @@ export * as comparer from "./comparer";
 export * as packageJson from "./package";
 export * as menu from "./menu";
 export * as statusbar from "./statusbar";
+export * as profiler from "./profiler";
