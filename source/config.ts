@@ -22,6 +22,19 @@ interface PackageJsonConfiguration<PropertiesT extends PropertiesBaseType>
 {
     properties: PropertiesT;
 }
+export interface InspectResultType<valueT>
+{
+    key: string,
+    defaultValue?: valueT,
+    globalValue?: valueT,
+    workspaceValue?: valueT,
+    workspaceFolderValue?: valueT,
+    defaultLanguageValue?: valueT,
+    globalLanguageValue?: valueT,
+    workspaceLanguageValue?: valueT,
+    workspaceFolderLanguageValue?: valueT,
+    languageIds?: string[],
+};
 export class Entry<PropertiesT extends PropertiesBaseType, valueT>
 {
     public defaultValue: valueT;
@@ -97,9 +110,34 @@ export class Entry<PropertiesT extends PropertiesBaseType, valueT>
             return result;
         }
     );
+    inspectCache = new Cache
+    (
+        (languageId: string): InspectResultType<valueT> =>
+        {
+            let result: InspectResultType<valueT>;
+            if (undefined === languageId || null === languageId || 0 === languageId.length)
+            {
+                const key = this.key.replace(sectionKeyRegExp, "$1");
+                const name = this.key.replace(sectionKeyRegExp, "$2");
+                result = <InspectResultType<valueT>>vscode.workspace.getConfiguration(key).inspect(name);
+            }
+            else
+            {
+                const langSection = vscode.workspace.getConfiguration(`[${languageId}]`, null);
+                result = <InspectResultType<valueT>>langSection.inspect(this.key);
+            }
+            return result;
+        }
+    );
     public get = this.cache.get;
     public getCache = this.cache.getCache;
-    public clear = this.cache.clear;
+    public inspect = this.inspectCache.get;
+    public getInspectCache = this.inspectCache.getCache;
+    public clear = () =>
+    {
+        this.cache.clear;
+        this.inspectCache.clear;
+    }
 }
 export class MapEntry<PropertiesT extends PropertiesBaseType, ObjectT>
 {
@@ -114,7 +152,9 @@ export class MapEntry<PropertiesT extends PropertiesBaseType, ObjectT>
     config = new Entry<PropertiesT, keyof ObjectT>(this.properties, this.key, makeEnumValidator(this.mapObject));
     public get = (languageId: string) => this.mapObject[this.config.cache.get(languageId)];
     public getCache = (languageId: string) => this.mapObject[this.config.cache.getCache(languageId)];
-    public clear = this.config.cache.clear;
+    public inspect = this.config.inspectCache.get;
+    public getInspectCache = this.config.inspectCache.getCache;
+    public clear =this.config.clear;
 }
 export const makeEnumValidator = <ObjectT>(mapObject: ObjectT): (value: keyof ObjectT) => boolean => (value: keyof ObjectT): boolean => 0 <= Object.keys(mapObject).indexOf(value.toString());
 export const stringArrayValidator = (value: string[]) => "[object Array]" === Object.prototype.toString.call(value) && value.map(i => "string" === typeof i).reduce((a, b) => a && b, true);
