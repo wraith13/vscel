@@ -105,13 +105,13 @@ export const showQuickPick = async <T extends CommandMenuItem>
 };
 export interface InputBoxOptions extends vscode.InputBoxOptions
 {
-    preview?: (input: string) => unknown;
+    preview?: boolean;
     command?: (input: string) => Promise<unknown>;
     onCancel?: () => Promise<unknown>
 }
 export const showInputBox = async <T extends InputBoxOptions>(options?: T, token?: vscode.CancellationToken) =>
 {
-    const preview = options?.preview;
+    const preview = options?.preview ?? true;
     const command = options?.command;
     const onCancel = options?.onCancel;
     const vscodeOptions = base.simplyDeepCopy(options ?? <T>{ });
@@ -120,12 +120,15 @@ export const showInputBox = async <T extends InputBoxOptions>(options?: T, token
     vscodeOptions.onCancel = undefined;
     if (preview)
     {
-        vscodeOptions.validateInput = input =>
+        vscodeOptions.validateInput = async input =>
         {
             const result = options?.validateInput?.(input);
             if (undefined === result || null === result)
             {
-                preview(input);
+                if (preview)
+                {
+                    await command?.(input);
+                }
             }
             return result;
         };
