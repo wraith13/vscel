@@ -135,8 +135,8 @@ export class Entry<PropertiesT extends PropertiesBaseType, valueT>
     public getInspectCache = this.inspectCache.getCache;
     public clear = () =>
     {
-        this.cache.clear;
-        this.inspectCache.clear;
+        this.cache.clear();
+        this.inspectCache.clear();
     }
 }
 export class MapEntry<PropertiesT extends PropertiesBaseType, ObjectT>
