@@ -107,16 +107,19 @@ export interface InputBoxOptions extends vscode.InputBoxOptions
 {
     preview?: boolean;
     command?: (input: string) => Promise<unknown>;
+    rollback?: () => Promise<unknown>;
     onCancel?: () => Promise<unknown>
 }
 export const showInputBox = async <T extends InputBoxOptions>(options?: T, token?: vscode.CancellationToken) =>
 {
     const preview = options?.preview ?? true;
     const command = options?.command;
+    const rollback = options?.rollback;
     const onCancel = options?.onCancel;
     const vscodeOptions = base.simplyDeepCopy(options ?? <T>{ });
     vscodeOptions.preview = undefined;
     vscodeOptions.command = undefined;
+    vscodeOptions.rollback = undefined;
     vscodeOptions.onCancel = undefined;
     if (preview)
     {
@@ -130,6 +133,10 @@ export const showInputBox = async <T extends InputBoxOptions>(options?: T, token
                     await command?.(input);
                 }
             }
+            else
+            {
+                await rollback?.();
+            }
             return result;
         };
     }
@@ -140,6 +147,7 @@ export const showInputBox = async <T extends InputBoxOptions>(options?: T, token
     }
     else
     {
+        await rollback?.();
         await onCancel?.();
     }
     return result;
