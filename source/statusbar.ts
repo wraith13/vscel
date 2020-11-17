@@ -7,7 +7,8 @@ export const createItem =
         priority?: number,
         text ? : string,
         command ? : string,
-        tooltip ? : string
+        tooltip ? : string,
+        withShow? : boolean,
     }
 )
 : vscode.StatusBarItem =>
@@ -28,6 +29,10 @@ export const createItem =
     if (undefined !== properties.tooltip)
     {
         result.tooltip = properties.tooltip;
+    }
+    if (properties.withShow)
+    {
+        result.show();
     }
     return result;
 };
