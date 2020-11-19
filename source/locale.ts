@@ -23,4 +23,8 @@ export class Locale<LocaleEntryType extends LocaleEntry>
         this.isTypealbeLocale ?
             this.string(key):
             `${this.string(key)} ( ${this.basicLocale[key]} )`;
+    public key = (text: string | undefined): (keyof LocaleEntryType & string) | undefined =>
+        undefined === text ?
+            undefined:
+            Object.entries(this.localeTable).filter(i => i[1] === text).map(i => i[0])[0];
 }

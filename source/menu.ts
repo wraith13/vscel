@@ -168,7 +168,7 @@ export interface ShowMessageOptionsTyped<LocaleEntryType extends locale.LocaleEn
 }
 export type ShowMessageOptions<LocaleEntryType extends locale.LocaleEntry> =
     ShowMessageOptionsRegular<LocaleEntryType> | ShowMessageOptionsTyped<LocaleEntryType>
-export const showMessage = <LocaleEntryType extends locale.LocaleEntry>
+export const showMessage = async <LocaleEntryType extends locale.LocaleEntry>
 (
     target:
         typeof vscode.window.showInformationMessage |
@@ -176,18 +176,21 @@ export const showMessage = <LocaleEntryType extends locale.LocaleEntry>
         typeof vscode.window.showErrorMessage,
     options: ShowMessageOptions<LocaleEntryType>,
     ...items: (keyof LocaleEntryType & string)[]
-) => target
+) => options.locale.key
 (
-    (<ShowMessageOptionsRegular<LocaleEntryType>>options).message ?? // 呼び出し側の都合を考えると、通常 message は動的に作られた文字列になるので message の方を優先する。
+    await target
     (
-        undefined !== (<ShowMessageOptionsTyped<LocaleEntryType>>options).typedMessage ?
-            options.locale.map((<ShowMessageOptionsTyped<LocaleEntryType>>options).typedMessage):
-            "no message" // 型を壊されてない限りここに到達することない
-    ),
-    {
-        modal: options.modal
-    },
-    ...items.map(options.locale.map)
+        (<ShowMessageOptionsRegular<LocaleEntryType>>options).message ?? // 呼び出し側の都合を考えると、通常 message は動的に作られた文字列になるので message の方を優先する。
+        (
+            undefined !== (<ShowMessageOptionsTyped<LocaleEntryType>>options).typedMessage ?
+                options.locale.map((<ShowMessageOptionsTyped<LocaleEntryType>>options).typedMessage):
+                "no message" // 型を壊されてない限りここに到達することない
+        ),
+        {
+            modal: options.modal
+        },
+        ...items.map(options.locale.map)
+    )
 );
 export const showInformationMessage = <LocaleEntryType extends locale.LocaleEntry>
 (
