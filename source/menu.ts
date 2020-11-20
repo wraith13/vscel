@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import * as base from './base';
-import * as locale from './locale';
 export interface CommandMenuItem extends vscode.QuickPickItem
 {
     when?: (menus: CommandMenuItem[]) => boolean;
@@ -152,73 +151,4 @@ export const showInputBox = async <T extends InputBoxOptions>(options?: T, token
         await onCancel?.();
     }
     return result;
-}
-export interface ShowMessageOptionsBase<LocaleEntryType extends locale.LocaleEntry>
-{
-    locale: locale.Locale<LocaleEntryType>;
-    modal?: boolean;
-}
-export interface ShowMessageOptionsRegular<LocaleEntryType extends locale.LocaleEntry> extends ShowMessageOptionsBase<LocaleEntryType>
-{
-    message: string;
-}
-export interface ShowMessageOptionsTyped<LocaleEntryType extends locale.LocaleEntry> extends ShowMessageOptionsBase<LocaleEntryType>
-{
-    typedMessage: keyof LocaleEntryType & string;
-}
-export type ShowMessageOptions<LocaleEntryType extends locale.LocaleEntry> =
-    ShowMessageOptionsRegular<LocaleEntryType> | ShowMessageOptionsTyped<LocaleEntryType>
-export const showMessage = async <LocaleEntryType extends locale.LocaleEntry>
-(
-    target:
-        typeof vscode.window.showInformationMessage |
-        typeof vscode.window.showWarningMessage |
-        typeof vscode.window.showErrorMessage,
-    options: ShowMessageOptions<LocaleEntryType>,
-    ...items: (keyof LocaleEntryType & string)[]
-) => options.locale.key
-(
-    await target
-    (
-        (<ShowMessageOptionsRegular<LocaleEntryType>>options).message ?? // 呼び出し側の都合を考えると、通常 message は動的に作られた文字列になるので message の方を優先する。
-        (
-            undefined !== (<ShowMessageOptionsTyped<LocaleEntryType>>options).typedMessage ?
-                options.locale.map((<ShowMessageOptionsTyped<LocaleEntryType>>options).typedMessage):
-                "no message" // 型を壊されてない限りここに到達することない
-        ),
-        {
-            modal: options.modal
-        },
-        ...items.map(options.locale.map)
-    )
-);
-export const showInformationMessage = <LocaleEntryType extends locale.LocaleEntry>
-(
-    options: ShowMessageOptions<LocaleEntryType>,
-    ...items: (keyof LocaleEntryType & string)[]
-) => showMessage
-(
-    vscode.window.showInformationMessage,
-    options,
-    ...items
-);
-export const showWarningMessage = <LocaleEntryType extends locale.LocaleEntry>
-(
-    options: ShowMessageOptions<LocaleEntryType>,
-    ...items: (keyof LocaleEntryType & string)[]
-) => showMessage
-(
-    vscode.window.showWarningMessage,
-    options,
-    ...items
-);
-export const showErrorMessage = <LocaleEntryType extends locale.LocaleEntry>
-(
-    options: ShowMessageOptions<LocaleEntryType>,
-    ...items: (keyof LocaleEntryType & string)[]
-) => showMessage
-(
-    vscode.window.showErrorMessage,
-    options,
-    ...items
-);
+};
