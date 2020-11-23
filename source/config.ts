@@ -150,7 +150,8 @@ export class MapEntry<PropertiesT extends PropertiesBaseType, ObjectT>
     {
     }
     config = new Entry<PropertiesT, keyof ObjectT>(this.properties, this.key, makeEnumValidator(this.mapObject));
-    public get = (languageId: string) => this.mapObject[this.config.cache.get(languageId)];
+    public getKey = (languageId: string) => this.config.cache.get(languageId);
+    public get = (languageId: string) => this.mapObject[this.getKey(languageId)];
     public getCache = (languageId: string) => this.mapObject[this.config.cache.getCache(languageId)];
     public inspect = this.config.inspectCache.get;
     public getInspectCache = this.config.inspectCache.getCache;
