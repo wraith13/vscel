@@ -138,6 +138,102 @@ export class Entry<PropertiesT extends PropertiesBaseType, valueT>
         this.cache.clear();
         this.inspectCache.clear();
     }
+    public set =
+    async (
+        value: valueT,
+        scope?: vscode.ConfigurationScope | null,
+        configurationTarget?: vscode.ConfigurationTarget,
+        overrideInLanguage?: boolean
+    ) =>
+    {
+        const key = this.key.replace(sectionKeyRegExp, "$1");
+        const name = this.key.replace(sectionKeyRegExp, "$2");
+        const config = vscode.workspace.getConfiguration(key, scope);
+        if (undefined !== configurationTarget)
+        {
+            await config.update(name, value, configurationTarget, overrideInLanguage);
+        }
+        else
+        {
+            const inspectResult = config.inspect(name);
+            if (undefined !== inspectResult?.workspaceFolderLanguageValue)
+            {
+                await config.update(name, value, vscode.ConfigurationTarget.WorkspaceFolder, true);
+            }
+            else
+            if (undefined !== inspectResult?.workspaceLanguageValue)
+            {
+                await config.update(name, value, vscode.ConfigurationTarget.Workspace, true);
+            }
+            else
+            if (undefined !== inspectResult?.globalLanguageValue || true === overrideInLanguage)
+            {
+                await config.update(name, value, vscode.ConfigurationTarget.Global, true);
+            }
+            if (undefined !== inspectResult?.workspaceFolderValue)
+            {
+                await config.update(name, value, vscode.ConfigurationTarget.WorkspaceFolder, false);
+            }
+            else
+            if (undefined !== inspectResult?.workspaceValue)
+            {
+                await config.update(name, value, vscode.ConfigurationTarget.Workspace, false);
+            }
+            else
+            //if (undefined !== inspectResult?.globalValue)
+            {
+                await config.update(name, value, vscode.ConfigurationTarget.Global, false);
+            }
+        }
+    }
+    public setByLanguageId =
+    async (
+        languageId: string,
+        value: valueT,
+        scope?: vscode.ConfigurationScope | null,
+        configurationTarget?: vscode.ConfigurationTarget
+    ) =>
+    {
+        await vscode.workspace.getConfiguration(`[${languageId}]`, scope).update(this.key, value, configurationTarget);
+        const config = vscode.workspace.getConfiguration(`[${languageId}]`, scope);
+        if (undefined !== configurationTarget)
+        {
+            await config.update(this.key, value, configurationTarget);
+        }
+        else
+        {
+            const inspectResult = config.inspect(this.key);
+            // if (undefined !== inspectResult?.workspaceFolderLanguageValue)
+            // {
+            //     await config.update(this.key, value, vscode.ConfigurationTarget.WorkspaceFolder, true);
+            // }
+            // else
+            // if (undefined !== inspectResult?.workspaceLanguageValue)
+            // {
+            //     await config.update(this.key, value, vscode.ConfigurationTarget.Workspace, true);
+            // }
+            // else
+            // if (undefined !== inspectResult?.globalLanguageValue)
+            // {
+            //     await config.update(this.key, value, vscode.ConfigurationTarget.Global, true);
+            // }
+            if (undefined !== inspectResult?.workspaceFolderValue)
+            {
+                await config.update(this.key, value, vscode.ConfigurationTarget.WorkspaceFolder, false);
+            }
+            else
+            if (undefined !== inspectResult?.workspaceValue)
+            {
+                await config.update(this.key, value, vscode.ConfigurationTarget.Workspace, false);
+            }
+            else
+            //if (undefined !== inspectResult?.globalValue)
+            {
+                await config.update(this.key, value, vscode.ConfigurationTarget.Global, false);
+            }
+        }
+
+    }
 }
 export class MapEntry<PropertiesT extends PropertiesBaseType, ObjectT>
 {
