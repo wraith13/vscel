@@ -137,7 +137,13 @@ export class Entry<PropertiesT extends PropertiesBaseType, valueT>
     {
         this.cache.clear();
         this.inspectCache.clear();
-    }
+    };
+    getBase = (scope?: vscode.ConfigurationScope | null) =>
+        vscode.workspace.getConfiguration(this.key.replace(sectionKeyRegExp, "$1"), scope);
+    getBaseByLanguageId = (languageId: string, scope?: vscode.ConfigurationScope | null) =>
+    vscode.workspace.getConfiguration(`[${languageId}]`, scope);
+    // public inspect = async (scope?: vscode.ConfigurationScope | null) =>
+    //     this.getBase(scope).inspect(this.key.replace(sectionKeyRegExp, "$2"));
     public set =
     async (
         value: valueT,
@@ -146,9 +152,8 @@ export class Entry<PropertiesT extends PropertiesBaseType, valueT>
         overrideInLanguage?: boolean
     ) =>
     {
-        const key = this.key.replace(sectionKeyRegExp, "$1");
         const name = this.key.replace(sectionKeyRegExp, "$2");
-        const config = vscode.workspace.getConfiguration(key, scope);
+        const config = this.getBase(scope);
         if (undefined !== configurationTarget)
         {
             await config.update(name, value, configurationTarget, overrideInLanguage);
@@ -194,8 +199,7 @@ export class Entry<PropertiesT extends PropertiesBaseType, valueT>
         configurationTarget?: vscode.ConfigurationTarget
     ) =>
     {
-        await vscode.workspace.getConfiguration(`[${languageId}]`, scope).update(this.key, value, configurationTarget);
-        const config = vscode.workspace.getConfiguration(`[${languageId}]`, scope);
+        const config = this.getBaseByLanguageId(languageId, scope);
         if (undefined !== configurationTarget)
         {
             await config.update(this.key, value, configurationTarget);
