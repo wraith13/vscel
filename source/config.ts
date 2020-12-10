@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import { Cache } from "./cache";
 const sectionKeyRegExp = /^(.+)\.([^.]+)$/;
 type PropertiesBaseType =
 {
@@ -51,99 +50,54 @@ export class Entry<PropertiesT extends PropertiesBaseType, valueT>
         this.minValue = properties[key].minimum;
         this.maxValue = properties[key].maximum;
     }
-    regulate = (rawKey: string, value: valueT): valueT =>
+    regulate = (rawKey: string, value: valueT | undefined): valueT =>
     {
-        let result = value;
-        if (this.validator && !this.validator(result))
+        if (undefined === value)
+        {
+            return this.defaultValue;
+        }
+        else
+        if (this.validator && !this.validator(value))
         {
             // settings.json をテキストとして直接編集してる時はともかく GUI での編集時に無駄にエラー表示が行われてしまうので、エンドユーザーに対するエラー表示は行わない。
             //vscode.window.showErrorMessage(`${rawKey} setting value is invalid! Please check your settings.`);
             console.error(`"${rawKey}" setting value(${JSON.stringify(value)}) is invalid! Please check your settings.`);
-            result = this.defaultValue;
+            return this.defaultValue;
         }
         else
         {
-            if (undefined !== this.minValue && result < this.minValue)
+            if (undefined !== this.minValue && value < this.minValue)
             {
-                result = this.minValue;
+                return this.minValue;
             }
             else
-            if (undefined !== this.maxValue && this.maxValue < result)
+            if (undefined !== this.maxValue && this.maxValue < value)
             {
-                result = this.maxValue;
+                return this.maxValue;
             }
         }
-        return result;
+        return value;
     }
-    cache = new Cache
-    (
-        (languageId: string): valueT =>
-        {
-            let result: valueT;
-            if (undefined === languageId || null === languageId || 0 === languageId.length)
-            {
-                const key = this.key.replace(sectionKeyRegExp, "$1");
-                const name = this.key.replace(sectionKeyRegExp, "$2");
-                result = <valueT>vscode.workspace.getConfiguration(key)[name];
-                if (undefined === result)
-                {
-                    result = this.defaultValue;
-                }
-                else
-                {
-                    result = this.regulate(this.key, result);
-                }
-            }
-            else
-            {
-                const langSection = vscode.workspace.getConfiguration(`[${languageId}]`, null);
-                result = <valueT>langSection[this.key];
-                if (undefined === result)
-                {
-                    result = this.get("");
-                }
-                else
-                {
-                    result = this.regulate(`[${languageId}].${this.key}`, result);
-                }
-            }
-            return result;
-        }
-    );
-    inspectCache = new Cache
-    (
-        (languageId: string): InspectResultType<valueT> =>
-        {
-            let result: InspectResultType<valueT>;
-            if (undefined === languageId || null === languageId || 0 === languageId.length)
-            {
-                const key = this.key.replace(sectionKeyRegExp, "$1");
-                const name = this.key.replace(sectionKeyRegExp, "$2");
-                result = <InspectResultType<valueT>>vscode.workspace.getConfiguration(key).inspect(name);
-            }
-            else
-            {
-                const langSection = vscode.workspace.getConfiguration(`[${languageId}]`, null);
-                result = <InspectResultType<valueT>>langSection.inspect(this.key);
-            }
-            return result;
-        }
-    );
-    public get = this.cache.get;
-    public getCache = this.cache.getCache;
-    public inspect = this.inspectCache.get;
-    public getInspectCache = this.inspectCache.getCache;
-    public clear = () =>
-    {
-        this.cache.clear();
-        this.inspectCache.clear();
-    };
     getBase = (scope?: vscode.ConfigurationScope | null) =>
         vscode.workspace.getConfiguration(this.key.replace(sectionKeyRegExp, "$1"), scope);
     getBaseByLanguageId = (languageId: string, scope?: vscode.ConfigurationScope | null) =>
-    vscode.workspace.getConfiguration(`[${languageId}]`, scope);
-    // public inspect = async (scope?: vscode.ConfigurationScope | null) =>
-    //     this.getBase(scope).inspect(this.key.replace(sectionKeyRegExp, "$2"));
+        vscode.workspace.getConfiguration(`[${languageId}]`, scope);
+    public get = (scope?: vscode.ConfigurationScope | null) =>
+        this.regulate(this.key, this.getBase(scope).get(this.key.replace(sectionKeyRegExp, "$2")));
+    public getByLanguageId = (languageId: string, scope?: vscode.ConfigurationScope | null) =>
+    {
+        const languageValue: valueT | undefined = this.getBaseByLanguageId(languageId, scope).get(this.key);
+        if (undefined !== languageValue)
+        {
+            return this.regulate(`[${languageId}].${this.key}`, languageValue);
+        }
+        else
+        {
+            return this.get(scope);
+        }
+    }
+    public inspect = (scope?: vscode.ConfigurationScope | null) =>
+        this.getBase(scope).inspect(this.key.replace(sectionKeyRegExp, "$2"));
     public set =
     async (
         value: valueT,
@@ -250,12 +204,30 @@ export class MapEntry<PropertiesT extends PropertiesBaseType, ObjectT>
     {
     }
     config = new Entry<PropertiesT, keyof ObjectT>(this.properties, this.key, makeEnumValidator(this.mapObject));
-    public getKey = (languageId: string) => this.config.cache.get(languageId);
-    public get = (languageId: string) => this.mapObject[this.getKey(languageId)];
-    public getCache = (languageId: string) => this.mapObject[this.config.cache.getCache(languageId)];
-    public inspect = this.config.inspectCache.get;
-    public getInspectCache = this.config.inspectCache.getCache;
-    public clear =this.config.clear;
+    public getKey = (scope?: vscode.ConfigurationScope | null) => this.config.get(scope);
+    public getKeyByLanguageId = (languageId: string, scope?: vscode.ConfigurationScope | null) =>
+        this.config.getByLanguageId(languageId, scope);
+    public get = async (scope?: vscode.ConfigurationScope | null) => this.mapObject[this.getKey(scope)];
+    public getByLanguageId = (languageId: string, scope?: vscode.ConfigurationScope | null) =>
+        this.mapObject[this.getKeyByLanguageId(languageId, scope)];
+    public inspectKey = async (scope?: vscode.ConfigurationScope | null) => this.config.inspect(scope);
+    public setKey =
+    async (
+        key: keyof ObjectT,
+        scope?: vscode.ConfigurationScope | null,
+        configurationTarget?: vscode.ConfigurationTarget,
+        overrideInLanguage?: boolean
+    ) =>
+        this.config.set(key, scope, configurationTarget, overrideInLanguage);
+
+    public setByLanguageId =
+    async (
+        languageId: string,
+        key: keyof ObjectT,
+        scope?: vscode.ConfigurationScope | null,
+        configurationTarget?: vscode.ConfigurationTarget
+    ) =>
+        this.config.setByLanguageId(languageId, key, scope, configurationTarget);
 }
 export const makeEnumValidator = <ObjectT>(mapObject: ObjectT): (value: keyof ObjectT) => boolean => (value: keyof ObjectT): boolean => 0 <= Object.keys(mapObject).indexOf(value.toString());
 export const stringArrayValidator = (value: string[]) => "[object Array]" === Object.prototype.toString.call(value) && value.map(i => "string" === typeof i).reduce((a, b) => a && b, true);
