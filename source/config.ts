@@ -84,6 +84,7 @@ export class Entry<PropertiesT extends PropertiesBaseType, valueT>
         vscode.workspace.getConfiguration(`[${languageId}]`, scope);
     public get = (scope?: vscode.ConfigurationScope | null) =>
         this.regulate(this.key, this.getBase(scope).get(this.key.replace(sectionKeyRegExp, "$2")));
+    public getByActiveTextEditor = () => this.get(vscode.window.activeTextEditor?.document);
     public getByLanguageId = (languageId: string, scope?: vscode.ConfigurationScope | null) =>
     {
         const languageValue: valueT | undefined = this.getBaseByLanguageId(languageId, scope).get(this.key);
@@ -98,6 +99,7 @@ export class Entry<PropertiesT extends PropertiesBaseType, valueT>
     }
     public inspect = (scope?: vscode.ConfigurationScope | null) =>
         this.getBase(scope).inspect(this.key.replace(sectionKeyRegExp, "$2"));
+    public inspectByActiveTextEditor = () => this.inspect(vscode.window.activeTextEditor?.document);
     public set =
     async (
         value: valueT,
@@ -145,6 +147,13 @@ export class Entry<PropertiesT extends PropertiesBaseType, valueT>
             }
         }
     }
+    public setByActiveTextEditor =
+    async (
+        value: valueT,
+        configurationTarget?: vscode.ConfigurationTarget,
+        overrideInLanguage?: boolean
+    ) =>
+        await this.set(value, vscode.window.activeTextEditor?.document, configurationTarget, overrideInLanguage);
     public setByLanguageId =
     async (
         languageId: string,
@@ -205,12 +214,15 @@ export class MapEntry<PropertiesT extends PropertiesBaseType, ObjectT>
     }
     config = new Entry<PropertiesT, keyof ObjectT>(this.properties, this.key, makeEnumValidator(this.mapObject));
     public getKey = (scope?: vscode.ConfigurationScope | null) => this.config.get(scope);
+    public getKeyByActiveTextEditor = () => this.config.getByActiveTextEditor();
     public getKeyByLanguageId = (languageId: string, scope?: vscode.ConfigurationScope | null) =>
         this.config.getByLanguageId(languageId, scope);
-    public get = async (scope?: vscode.ConfigurationScope | null) => this.mapObject[this.getKey(scope)];
+    public get = (scope?: vscode.ConfigurationScope | null) => this.mapObject[this.getKey(scope)];
+    public getByActiveTextEditor = () => this.mapObject[this.getKeyByActiveTextEditor()];
     public getByLanguageId = (languageId: string, scope?: vscode.ConfigurationScope | null) =>
         this.mapObject[this.getKeyByLanguageId(languageId, scope)];
-    public inspectKey = async (scope?: vscode.ConfigurationScope | null) => this.config.inspect(scope);
+    public inspectKey = (scope?: vscode.ConfigurationScope | null) => this.config.inspect(scope);
+    public inspectKeyByActiveTextEditor = () => this.config.inspectByActiveTextEditor();
     public setKey =
     async (
         key: keyof ObjectT,
@@ -218,16 +230,22 @@ export class MapEntry<PropertiesT extends PropertiesBaseType, ObjectT>
         configurationTarget?: vscode.ConfigurationTarget,
         overrideInLanguage?: boolean
     ) =>
-        this.config.set(key, scope, configurationTarget, overrideInLanguage);
-
-    public setByLanguageId =
+        await this.config.set(key, scope, configurationTarget, overrideInLanguage);
+    public setKeyByActiveTextEditor =
+        async (
+            key: keyof ObjectT,
+            configurationTarget?: vscode.ConfigurationTarget,
+            overrideInLanguage?: boolean
+        ) =>
+            await this.config.setByActiveTextEditor(key, configurationTarget, overrideInLanguage);
+        public setByLanguageId =
     async (
         languageId: string,
         key: keyof ObjectT,
         scope?: vscode.ConfigurationScope | null,
         configurationTarget?: vscode.ConfigurationTarget
     ) =>
-        this.config.setByLanguageId(languageId, key, scope, configurationTarget);
+        await this.config.setByLanguageId(languageId, key, scope, configurationTarget);
 }
 export const makeEnumValidator = <ObjectT>(mapObject: ObjectT): (value: keyof ObjectT) => boolean => (value: keyof ObjectT): boolean => 0 <= Object.keys(mapObject).indexOf(value.toString());
 export const stringArrayValidator = (value: string[]) => "[object Array]" === Object.prototype.toString.call(value) && value.map(i => "string" === typeof i).reduce((a, b) => a && b, true);
