@@ -1,13 +1,14 @@
 import * as vscode from 'vscode';
 const sectionKeyRegExp = /^(.+)\.([^.]+)$/;
+type PropertiesEntry<valueT> =
+{
+    default?: valueT;
+    minimum?: valueT;
+    maximum?: valueT;
+}
 type PropertiesBaseType =
 {
-    [key: string]:
-    {
-        default?: any;
-        minimum?: any;
-        maximum?: any;
-    }
+    [key: string]: PropertiesEntry<any>;
 };
 interface PackageJson<PropertiesT extends PropertiesBaseType>
 {
@@ -34,63 +35,59 @@ export interface InspectResultType<valueT>
     workspaceFolderLanguageValue?: valueT,
     languageIds?: string[],
 };
-export class Entry<PropertiesT extends PropertiesBaseType, valueT>
+export class Entry<valueT>
 {
-    public defaultValue: valueT;
-    public minValue: valueT | undefined;
-    public maxValue: valueT | undefined;
     public constructor
     (
-        public properties: PropertiesT,
-        public key: keyof PropertiesT & string,
-        public validator?: (value: valueT) => boolean
+        public data:
+        {
+            key: string,
+            properties?: PropertiesEntry<valueT>,
+            validator?: (value: valueT) => boolean
+        }
     )
-    {
-        this.defaultValue = properties[key].default;
-        this.minValue = properties[key].minimum;
-        this.maxValue = properties[key].maximum;
-    }
+    { }
     regulate = (rawKey: string, value: valueT | undefined): valueT =>
     {
         if (undefined === value)
         {
-            return this.defaultValue;
+            return <valueT>this.data.properties?.default;
         }
         else
-        if (this.validator && !this.validator(value))
+        if (this.data.validator && !this.data.validator(value))
         {
             // settings.json をテキストとして直接編集してる時はともかく GUI での編集時に無駄にエラー表示が行われてしまうので、エンドユーザーに対するエラー表示は行わない。
             //vscode.window.showErrorMessage(`${rawKey} setting value is invalid! Please check your settings.`);
             console.error(`"${rawKey}" setting value(${JSON.stringify(value)}) is invalid! Please check your settings.`);
-            return this.defaultValue;
+            return <valueT>this.data.properties?.default;
         }
         else
         {
-            if (undefined !== this.minValue && value < this.minValue)
+            if (undefined !== this.data.properties?.minimum && value < this.data.properties?.minimum)
             {
-                return this.minValue;
+                return this.data.properties?.minimum;
             }
             else
-            if (undefined !== this.maxValue && this.maxValue < value)
+            if (undefined !== this.data.properties?.maximum && this.data.properties?.maximum < value)
             {
-                return this.maxValue;
+                return this.data.properties?.maximum;
             }
         }
         return value;
     }
     getBase = (scope?: vscode.ConfigurationScope | null) =>
-        vscode.workspace.getConfiguration(this.key.replace(sectionKeyRegExp, "$1"), scope);
+        vscode.workspace.getConfiguration(this.data.key.replace(sectionKeyRegExp, "$1"), scope);
     getBaseByLanguageId = (languageId: string, scope?: vscode.ConfigurationScope | null) =>
         vscode.workspace.getConfiguration(`[${languageId}]`, scope);
     public get = (scope?: vscode.ConfigurationScope | null) =>
-        this.regulate(this.key, this.getBase(scope).get(this.key.replace(sectionKeyRegExp, "$2")));
+        this.regulate(this.data.key, this.getBase(scope).get(this.data.key.replace(sectionKeyRegExp, "$2")));
     public getByActiveTextEditor = () => this.get(vscode.window.activeTextEditor?.document);
     public getByLanguageId = (languageId: string, scope?: vscode.ConfigurationScope | null) =>
     {
-        const languageValue: valueT | undefined = this.getBaseByLanguageId(languageId, scope).get(this.key);
+        const languageValue: valueT | undefined = this.getBaseByLanguageId(languageId, scope).get(this.data.key);
         if (undefined !== languageValue)
         {
-            return this.regulate(`[${languageId}].${this.key}`, languageValue);
+            return this.regulate(`[${languageId}].${this.data.key}`, languageValue);
         }
         else
         {
@@ -98,7 +95,7 @@ export class Entry<PropertiesT extends PropertiesBaseType, valueT>
         }
     }
     public inspect = (scope?: vscode.ConfigurationScope | null) =>
-        this.getBase(scope).inspect(this.key.replace(sectionKeyRegExp, "$2"));
+        this.getBase(scope).inspect(this.data.key.replace(sectionKeyRegExp, "$2"));
     public inspectByActiveTextEditor = () => this.inspect(vscode.window.activeTextEditor?.document);
     public set =
     async (
@@ -108,7 +105,7 @@ export class Entry<PropertiesT extends PropertiesBaseType, valueT>
         overrideInLanguage?: boolean
     ) =>
     {
-        const name = this.key.replace(sectionKeyRegExp, "$2");
+        const name = this.data.key.replace(sectionKeyRegExp, "$2");
         const config = this.getBase(scope);
         if (undefined !== configurationTarget)
         {
@@ -165,62 +162,70 @@ export class Entry<PropertiesT extends PropertiesBaseType, valueT>
         const config = this.getBaseByLanguageId(languageId, scope);
         if (undefined !== configurationTarget)
         {
-            await config.update(this.key, value, configurationTarget);
+            await config.update(this.data.key, value, configurationTarget);
         }
         else
         {
-            const inspectResult = config.inspect(this.key);
+            const inspectResult = config.inspect(this.data.key);
             // if (undefined !== inspectResult?.workspaceFolderLanguageValue)
             // {
-            //     await config.update(this.key, value, vscode.ConfigurationTarget.WorkspaceFolder, true);
+            //     await config.update(this.data.key, value, vscode.ConfigurationTarget.WorkspaceFolder, true);
             // }
             // else
             // if (undefined !== inspectResult?.workspaceLanguageValue)
             // {
-            //     await config.update(this.key, value, vscode.ConfigurationTarget.Workspace, true);
+            //     await config.update(this.data.key, value, vscode.ConfigurationTarget.Workspace, true);
             // }
             // else
             // if (undefined !== inspectResult?.globalLanguageValue)
             // {
-            //     await config.update(this.key, value, vscode.ConfigurationTarget.Global, true);
+            //     await config.update(this.data.key, value, vscode.ConfigurationTarget.Global, true);
             // }
             if (undefined !== inspectResult?.workspaceFolderValue)
             {
-                await config.update(this.key, value, vscode.ConfigurationTarget.WorkspaceFolder, false);
+                await config.update(this.data.key, value, vscode.ConfigurationTarget.WorkspaceFolder, false);
             }
             else
             if (undefined !== inspectResult?.workspaceValue)
             {
-                await config.update(this.key, value, vscode.ConfigurationTarget.Workspace, false);
+                await config.update(this.data.key, value, vscode.ConfigurationTarget.Workspace, false);
             }
             else
             //if (undefined !== inspectResult?.globalValue)
             {
-                await config.update(this.key, value, vscode.ConfigurationTarget.Global, false);
+                await config.update(this.data.key, value, vscode.ConfigurationTarget.Global, false);
             }
         }
 
     }
 }
-export class MapEntry<PropertiesT extends PropertiesBaseType, ObjectT>
+export class MapEntry<ObjectT>
 {
     public constructor
     (
-        public properties: PropertiesT,
-        public key: keyof PropertiesT & string,
-        public mapObject: ObjectT
+        public data:
+        {
+            key: string,
+            mapObject: ObjectT
+            properties?: PropertiesEntry<keyof ObjectT>,
+        }
     )
     {
     }
-    config = new Entry<PropertiesT, keyof ObjectT>(this.properties, this.key, makeEnumValidator(this.mapObject));
+    config = new Entry<keyof ObjectT>
+    ({
+        key:this.data.key,
+        properties: this.data.properties,
+        validator: makeEnumValidator(this.data.mapObject)
+    });
     public getKey = (scope?: vscode.ConfigurationScope | null) => this.config.get(scope);
     public getKeyByActiveTextEditor = () => this.config.getByActiveTextEditor();
     public getKeyByLanguageId = (languageId: string, scope?: vscode.ConfigurationScope | null) =>
         this.config.getByLanguageId(languageId, scope);
-    public get = (scope?: vscode.ConfigurationScope | null) => this.mapObject[this.getKey(scope)];
-    public getByActiveTextEditor = () => this.mapObject[this.getKeyByActiveTextEditor()];
+    public get = (scope?: vscode.ConfigurationScope | null) => this.data.mapObject[this.getKey(scope)];
+    public getByActiveTextEditor = () => this.data.mapObject[this.getKeyByActiveTextEditor()];
     public getByLanguageId = (languageId: string, scope?: vscode.ConfigurationScope | null) =>
-        this.mapObject[this.getKeyByLanguageId(languageId, scope)];
+        this.data.mapObject[this.getKeyByLanguageId(languageId, scope)];
     public inspectKey = (scope?: vscode.ConfigurationScope | null) => this.config.inspect(scope);
     public inspectKeyByActiveTextEditor = () => this.config.inspectByActiveTextEditor();
     public setKey =
@@ -247,9 +252,14 @@ export class MapEntry<PropertiesT extends PropertiesBaseType, ObjectT>
     ) =>
         await this.config.setByLanguageId(languageId, key, scope, configurationTarget);
 }
-export const makeEnumValidator = <ObjectT>(mapObject: ObjectT): (value: keyof ObjectT) => boolean => (value: keyof ObjectT): boolean => 0 <= Object.keys(mapObject).indexOf(value.toString());
-export const stringArrayValidator = (value: string[]) => "[object Array]" === Object.prototype.toString.call(value) && value.map(i => "string" === typeof i).reduce((a, b) => a && b, true);
-export type IEntry<PropertiesT extends PropertiesBaseType, valueT> = Entry<PropertiesT, valueT> | MapEntry<PropertiesT, valueT>;
+export const makeEnumValidator = <ObjectT>(mapObject: ObjectT):
+    (value: keyof ObjectT) => boolean =>
+        (value: keyof ObjectT): boolean =>
+            0 <= Object.keys(mapObject).indexOf(value.toString());
+export const stringArrayValidator = (value: string[]) =>
+    "[object Array]" === Object.prototype.toString.call(value) &&
+    value.map(i => "string" === typeof i).reduce((a, b) => a && b, true);
+export type IEntry<valueT> = Entry<valueT> | MapEntry<valueT>;
 export class Root<PropertiesT extends PropertiesBaseType>
 {
     constructor(public properties: PropertiesT) { }
@@ -257,14 +267,14 @@ export class Root<PropertiesT extends PropertiesBaseType>
     (
         key: keyof PropertiesT & string,
         validator?: (value: valueT) => boolean
-    ) => this.register(new Entry(this.properties, key, validator))
+    ) => this.register(new Entry({key, validator, properties: this.properties[key]}))
     public makeMapEntry = <ObjectT>
     (
         key: keyof PropertiesT & string,
         mapObject: ObjectT
-    ) => this.register(new MapEntry(this.properties, key, mapObject))
-    public entries = <IEntry<PropertiesT, unknown>[]>[];
-    private register = <valueT extends IEntry<PropertiesT, any>>(entry: valueT): valueT =>
+    ) => this.register(new MapEntry({key, mapObject, properties: this.properties[key]}))
+    public entries = <IEntry<unknown>[]>[];
+    private register = <valueT extends IEntry<any>>(entry: valueT): valueT =>
     {
         this.entries.push(entry);
         return entry;
