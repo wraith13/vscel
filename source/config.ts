@@ -95,11 +95,11 @@ export class Entry<valueT>
         }
     }
     public inspect = (scope?: vscode.ConfigurationScope | null) =>
-        this.getBase(scope).inspect(this.data.key.replace(sectionKeyRegExp, "$2"));
-    public inspectByActiveTextEditor = () => this.inspect(vscode.window.activeTextEditor?.document);
+        this.getBase(scope).inspect(this.data.key.replace(sectionKeyRegExp, "$2")) as InspectResultType<valueT>;
+    public inspectByActiveTextEditor = () => this.inspect(vscode.window.activeTextEditor?.document) as InspectResultType<valueT>;
     public set =
     async (
-        value: valueT,
+        value: valueT | undefined,
         scope?: vscode.ConfigurationScope | null,
         configurationTarget?: vscode.ConfigurationTarget,
         overrideInLanguage?: boolean
@@ -146,7 +146,7 @@ export class Entry<valueT>
     }
     public setByActiveTextEditor =
     async (
-        value: valueT,
+        value: valueT | undefined,
         configurationTarget?: vscode.ConfigurationTarget,
         overrideInLanguage?: boolean
     ) =>
@@ -154,7 +154,7 @@ export class Entry<valueT>
     public setByLanguageId =
     async (
         languageId: string,
-        value: valueT,
+        value: valueT | undefined,
         scope?: vscode.ConfigurationScope | null,
         configurationTarget?: vscode.ConfigurationTarget
     ) =>
@@ -230,7 +230,7 @@ export class MapEntry<ObjectT>
     public inspectKeyByActiveTextEditor = () => this.config.inspectByActiveTextEditor();
     public setKey =
     async (
-        key: keyof ObjectT,
+        key: keyof ObjectT | undefined,
         scope?: vscode.ConfigurationScope | null,
         configurationTarget?: vscode.ConfigurationTarget,
         overrideInLanguage?: boolean
@@ -238,7 +238,7 @@ export class MapEntry<ObjectT>
         await this.config.set(key, scope, configurationTarget, overrideInLanguage);
     public setKeyByActiveTextEditor =
         async (
-            key: keyof ObjectT,
+            key: keyof ObjectT | undefined,
             configurationTarget?: vscode.ConfigurationTarget,
             overrideInLanguage?: boolean
         ) =>
@@ -246,7 +246,7 @@ export class MapEntry<ObjectT>
         public setByLanguageId =
     async (
         languageId: string,
-        key: keyof ObjectT,
+        key: keyof ObjectT | undefined,
         scope?: vscode.ConfigurationScope | null,
         configurationTarget?: vscode.ConfigurationTarget
     ) =>
