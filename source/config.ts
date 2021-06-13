@@ -5,6 +5,7 @@ type PropertiesEntry<valueT> =
     default?: valueT;
     minimum?: valueT;
     maximum?: valueT;
+    scope?: "application" | "machine" | "window" | "resource" | "language-overridable" | "machine-overridable";
 }
 type PropertiesBaseType =
 {
@@ -35,6 +36,7 @@ export interface InspectResultType<valueT>
     workspaceFolderLanguageValue?: valueT,
     languageIds?: string[],
 };
+export type ScopeSource = vscode.ConfigurationScope | null | undefined | "root-workspace" | "active-workspace" | "active-text-editor" | "auto";
 export class Entry<valueT>
 {
     public constructor
@@ -75,18 +77,47 @@ export class Entry<valueT>
         }
         return value;
     }
-    getBase = (scope?: vscode.ConfigurationScope | null) =>
-        vscode.workspace.getConfiguration(this.data.key.replace(sectionKeyRegExp, "$1"), scope);
-    getBaseByLanguageId = (languageId: string, scope?: vscode.ConfigurationScope | null) =>
-        vscode.workspace.getConfiguration(`[${languageId}]`, scope);
-    public get = (scope?: vscode.ConfigurationScope | null) =>
+    getBase = (scope?: ScopeSource) =>
+        vscode.workspace.getConfiguration(this.data.key.replace(sectionKeyRegExp, "$1"), this.getScope(scope));
+    getBaseByLanguageId = (languageId: string, scope?: ScopeSource) =>
+        vscode.workspace.getConfiguration(`[${languageId}]`, this.getScope(scope));
+    getScope = (scope: ScopeSource): vscode.ConfigurationScope | null | undefined =>
+    {
+        switch(scope)
+        {
+        case "auto":
+            switch(this.data.properties?.scope)
+            {
+            case "application":
+                return null;
+            case "machine":
+                return null;
+            case "machine-overridable":
+                return null;
+            case "window":
+                return this.getScope("root-workspace");
+            case "resource":
+                return this.getScope("active-text-editor");
+            case "language-overridable":
+                return this.getScope("active-text-editor");
+            default:
+                return this.getScope("active-text-editor");
+            }
+        case "root-workspace":
+            return vscode.workspace.workspaceFolders?.[0];
+        case "active-workspace":
+            return vscode.window.activeTextEditor ?
+                vscode.workspace.getWorkspaceFolder(vscode.window.activeTextEditor.document.uri):
+                vscode.workspace.workspaceFolders?.[0];
+        case "active-text-editor":
+            return vscode.window.activeTextEditor?.document;
+        default:
+            return scope;
+        }
+    }
+    public get = (scope?: ScopeSource) =>
         this.regulate(this.data.key, this.getBase(scope).get(this.data.key.replace(sectionKeyRegExp, "$2")));
-    public getByRootWorkspace = () => this.get(vscode.workspace.workspaceFolders?.[0]);
-    public getByActiveWorkspace = () => vscode.window.activeTextEditor ?
-        this.get(vscode.workspace.getWorkspaceFolder(vscode.window.activeTextEditor.document.uri)):
-        this.getByRootWorkspace();
-    public getByActiveTextEditor = () => this.get(vscode.window.activeTextEditor?.document);
-    public getByLanguageId = (languageId: string, scope?: vscode.ConfigurationScope | null) =>
+    public getByLanguageId = (languageId: string, scope?: ScopeSource) =>
     {
         const languageValue: valueT | undefined = this.getBaseByLanguageId(languageId, scope).get(this.data.key);
         if (undefined !== languageValue)
@@ -98,13 +129,13 @@ export class Entry<valueT>
             return this.get(scope);
         }
     }
-    public inspect = (scope?: vscode.ConfigurationScope | null) =>
+    public inspect = (scope?: ScopeSource) =>
         this.getBase(scope).inspect(this.data.key.replace(sectionKeyRegExp, "$2")) as InspectResultType<valueT>;
     public inspectByActiveTextEditor = () => this.inspect(vscode.window.activeTextEditor?.document) as InspectResultType<valueT>;
     public set =
     async (
         value: valueT | undefined,
-        scope?: vscode.ConfigurationScope | null,
+        scope?: ScopeSource,
         configurationTarget?: vscode.ConfigurationTarget,
         overrideInLanguage?: boolean
     ) =>
@@ -159,7 +190,7 @@ export class Entry<valueT>
     async (
         languageId: string,
         value: valueT | undefined,
-        scope?: vscode.ConfigurationScope | null,
+        scope?: ScopeSource,
         configurationTarget?: vscode.ConfigurationTarget
     ) =>
     {
@@ -222,24 +253,18 @@ export class MapEntry<ObjectT>
         properties: this.data.properties,
         validator: makeEnumValidator(this.data.mapObject)
     });
-    public getKey = (scope?: vscode.ConfigurationScope | null) => this.config.get(scope);
-    public getKeyByRootWorkspace = () => this.config.getByRootWorkspace();
-    public getKeyByActiveWorkspace = () => this.config.getByActiveWorkspace();
-    public getKeyByActiveTextEditor = () => this.config.getByActiveTextEditor();
-    public getKeyByLanguageId = (languageId: string, scope?: vscode.ConfigurationScope | null) =>
+    public getKey = (scope?: ScopeSource) => this.config.get(scope);
+    public getKeyByLanguageId = (languageId: string, scope?: ScopeSource) =>
         this.config.getByLanguageId(languageId, scope);
-    public get = (scope?: vscode.ConfigurationScope | null) => this.data.mapObject[this.getKey(scope)];
-    public getByRootWorkspace = () => this.data.mapObject[this.getKeyByRootWorkspace()];
-    public getByActiveWorkspace = () => this.data.mapObject[this.getKeyByActiveWorkspace()];
-    public getByActiveTextEditor = () => this.data.mapObject[this.getKeyByActiveTextEditor()];
-    public getByLanguageId = (languageId: string, scope?: vscode.ConfigurationScope | null) =>
+    public get = (scope?: ScopeSource) => this.data.mapObject[this.getKey(scope)];
+    public getByLanguageId = (languageId: string, scope?: ScopeSource) =>
         this.data.mapObject[this.getKeyByLanguageId(languageId, scope)];
-    public inspectKey = (scope?: vscode.ConfigurationScope | null) => this.config.inspect(scope);
+    public inspectKey = (scope?: ScopeSource) => this.config.inspect(scope);
     public inspectKeyByActiveTextEditor = () => this.config.inspectByActiveTextEditor();
     public setKey =
     async (
         key: keyof ObjectT | undefined,
-        scope?: vscode.ConfigurationScope | null,
+        scope?: ScopeSource,
         configurationTarget?: vscode.ConfigurationTarget,
         overrideInLanguage?: boolean
     ) =>
@@ -255,7 +280,7 @@ export class MapEntry<ObjectT>
     async (
         languageId: string,
         key: keyof ObjectT | undefined,
-        scope?: vscode.ConfigurationScope | null,
+        scope?: ScopeSource,
         configurationTarget?: vscode.ConfigurationTarget
     ) =>
         await this.config.setByLanguageId(languageId, key, scope, configurationTarget);
