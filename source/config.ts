@@ -81,6 +81,12 @@ export class Entry<valueT>
         vscode.workspace.getConfiguration(`[${languageId}]`, scope);
     public get = (scope?: vscode.ConfigurationScope | null) =>
         this.regulate(this.data.key, this.getBase(scope).get(this.data.key.replace(sectionKeyRegExp, "$2")));
+    public getByWorkspace = () => this.get
+    (
+        vscode.window.activeTextEditor ?
+            vscode.workspace.getWorkspaceFolder(vscode.window.activeTextEditor.document.uri):
+            vscode.workspace.workspaceFolders?.[0]
+    );
     public getByActiveTextEditor = () => this.get(vscode.window.activeTextEditor?.document);
     public getByLanguageId = (languageId: string, scope?: vscode.ConfigurationScope | null) =>
     {
@@ -219,10 +225,12 @@ export class MapEntry<ObjectT>
         validator: makeEnumValidator(this.data.mapObject)
     });
     public getKey = (scope?: vscode.ConfigurationScope | null) => this.config.get(scope);
+    public getKeyByWorkspace = () => this.config.getByWorkspace();
     public getKeyByActiveTextEditor = () => this.config.getByActiveTextEditor();
     public getKeyByLanguageId = (languageId: string, scope?: vscode.ConfigurationScope | null) =>
         this.config.getByLanguageId(languageId, scope);
     public get = (scope?: vscode.ConfigurationScope | null) => this.data.mapObject[this.getKey(scope)];
+    public getByWorkspace = () => this.data.mapObject[this.getKeyByWorkspace()];
     public getByActiveTextEditor = () => this.data.mapObject[this.getKeyByActiveTextEditor()];
     public getByLanguageId = (languageId: string, scope?: vscode.ConfigurationScope | null) =>
         this.data.mapObject[this.getKeyByLanguageId(languageId, scope)];
