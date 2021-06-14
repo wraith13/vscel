@@ -5,7 +5,8 @@ type PropertiesEntry<valueT> =
     default?: valueT;
     minimum?: valueT;
     maximum?: valueT;
-    scope?: "application" | "machine" | "window" | "resource" | "language-overridable" | "machine-overridable";
+    // scope?: "application" | "machine" | "window" | "resource" | "language-overridable" | "machine-overridable";
+    scope?: string;
 }
 type PropertiesBaseType =
 {
