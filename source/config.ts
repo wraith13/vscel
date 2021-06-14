@@ -37,7 +37,8 @@ export interface InspectResultType<valueT>
     workspaceFolderLanguageValue?: valueT,
     languageIds?: string[],
 };
-export type ScopeSource = vscode.ConfigurationScope | null | undefined | "root-workspace" | "active-workspace" | "active-text-editor" | "auto";
+export type DefaultScope = "user" | "root-workspace" | "active-workspace" | "active-text-editor";
+export type ScopeSource = vscode.ConfigurationScope | null | undefined | "default" | DefaultScope;
 export class Entry<valueT>
 {
     public constructor
@@ -46,7 +47,8 @@ export class Entry<valueT>
         {
             key: string,
             properties?: PropertiesEntry<valueT>,
-            validator?: (value: valueT) => boolean
+            validator?: (value: valueT) => boolean,
+            defaultScope?: DefaultScope,
         }
     )
     { }
@@ -86,30 +88,16 @@ export class Entry<valueT>
     {
         switch(scope)
         {
-        case "auto":
-            switch(this.data.properties?.scope)
-            {
-            case "application":
-                return null;
-            case "machine":
-                return null;
-            case "machine-overridable":
-                return null;
-            case "window":
-                return this.getScope("root-workspace");
-            case "resource":
-                return this.getScope("active-text-editor");
-            case "language-overridable":
-                return this.getScope("active-text-editor");
-            default:
-                return this.getScope("active-text-editor");
-            }
+        case "default":
+            return this.getScope(this.data.defaultScope);
+        case "user":
+            return null;
         case "root-workspace":
             return vscode.workspace.workspaceFolders?.[0];
         case "active-workspace":
             return vscode.window.activeTextEditor ?
                 vscode.workspace.getWorkspaceFolder(vscode.window.activeTextEditor.document.uri):
-                vscode.workspace.workspaceFolders?.[0];
+                this.getScope("root-workspace");
         case "active-text-editor":
             return vscode.window.activeTextEditor?.document;
         default:
