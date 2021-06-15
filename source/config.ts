@@ -232,15 +232,17 @@ export class MapEntry<ObjectT>
             key: string,
             mapObject: ObjectT
             properties?: PropertiesEntry<keyof ObjectT>,
+            defaultScope?: DefaultScope,
         }
     )
     {
     }
     config = new Entry<keyof ObjectT>
     ({
-        key:this.data.key,
+        key: this.data.key,
         properties: this.data.properties,
-        validator: makeEnumValidator(this.data.mapObject)
+        validator: makeEnumValidator(this.data.mapObject),
+        defaultScope: this.data.defaultScope,
     });
     public getKey = (scope?: ScopeSource) => this.config.get(scope);
     public getKeyByLanguageId = (languageId: string, scope?: ScopeSource) =>
@@ -288,13 +290,15 @@ export class Root<PropertiesT extends PropertiesBaseType>
     public makeEntry = <valueT>
     (
         key: keyof PropertiesT & string,
+        defaultScope: DefaultScope,
         validator?: (value: valueT) => boolean
-    ) => this.register(new Entry({key, validator, properties: this.properties[key]}))
+    ) => this.register(new Entry({ key, validator, properties: this.properties[key], defaultScope, }))
     public makeMapEntry = <ObjectT>
     (
         key: keyof PropertiesT & string,
+        defaultScope: DefaultScope,
         mapObject: ObjectT
-    ) => this.register(new MapEntry({key, mapObject, properties: this.properties[key]}))
+    ) => this.register(new MapEntry({ key, mapObject, properties: this.properties[key], defaultScope, }))
     public entries = <IEntry<unknown>[]>[];
     private register = <valueT extends IEntry<any>>(entry: valueT): valueT =>
     {
