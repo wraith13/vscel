@@ -38,7 +38,7 @@ export interface InspectResultType<valueT>
     languageIds?: string[],
 };
 export type DefaultScope = "user" | "root-workspace" | "active-workspace" | "active-text-editor";
-export type ScopeSource = vscode.ConfigurationScope | null | undefined | "default" | DefaultScope;
+export type ScopeSource = vscode.ConfigurationScope | null | undefined | "default-scope" | DefaultScope;
 export class Entry<valueT>
 {
     public constructor
@@ -88,7 +88,7 @@ export class Entry<valueT>
     {
         switch(scope)
         {
-        case "default":
+        case "default-scope":
             return this.getScope(this.data.defaultScope);
         case "user":
             return null;
