@@ -23,7 +23,7 @@ export class Locale<LocaleEntryType extends LocaleEntry>
 {
     constructor(private basicLocale: LocaleEntryType, private locales: { [language: string]: LocaleEntryType }) { }
     //type KeyType = keyof typeof localeEn;
-    localeTableKey = <string>JSON.parse(<string>process.env.VSCODE_NLS_CONFIG).locale;
+    localeTableKey = vscode.env.language; // <string>JSON.parse(<string>process.env.VSCODE_NLS_CONFIG).locale;
     localeTable = Object.assign(JSON.parse(JSON.stringify(this.basicLocale)), (this.locales[this.localeTableKey] ?? { }));
     public isTypealbeLocale =
     [

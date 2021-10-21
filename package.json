@@ -1,6 +1,6 @@
 {
     "name": "@wraith13/vscel",
-    "version": "0.0.49",
+    "version": "0.0.51",
     "description": "Common libraries for Visual Studio Code Extension",
     "keywords": [
         "vscode",
