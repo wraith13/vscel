@@ -1,6 +1,6 @@
 {
     "name": "@wraith13/vscel",
-    "version": "0.0.51",
+    "version": "0.0.52",
     "description": "Common libraries for Visual Studio Code Extension",
     "keywords": [
         "vscode",
@@ -19,7 +19,7 @@
     "author": "wraith13",
     "license": "BSL-1.0",
     "devDependencies": {
-        "@types/vscode": "^1.50.0",
+        "@types/vscode": "^1.61.0",
         "@types/node": "^13.11.0",
         "eslint": "^6.8.0",
         "@typescript-eslint/eslint-plugin": "^4.1.1",
