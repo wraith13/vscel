@@ -39,6 +39,14 @@ export interface InspectResultType<valueT>
 };
 export type DefaultScope = "user" | "root-workspace" | "active-workspace" | "active-text-editor";
 export type ScopeSource = vscode.ConfigurationScope | null | undefined | "default-scope" | DefaultScope;
+export const Scope = Object.freeze
+({
+    defaultScope: <ScopeSource>"default-scope",
+    user: <DefaultScope>"user",
+    rootWorkspace: <DefaultScope>"root-workspace",
+    activeWorkspace: <DefaultScope>"active-workspace",
+    activeTextEditor: <DefaultScope>"active-text-editor",
+});
 export class Entry<valueT>
 {
     public constructor
