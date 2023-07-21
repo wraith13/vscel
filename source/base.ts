@@ -12,7 +12,7 @@ export const simplyDeepCopy = <T>(object: T): T =>
             else
             {
                 const result = <T>{ };
-                Object.keys(object).forEach(i => (<any>result)[i] = simplyDeepCopy((<any>object)[i]));
+                Object.keys(object as unknown as object).forEach(i => (<any>result)[i] = simplyDeepCopy((<any>object)[i]));
                 return result;
             }
         case "function":
@@ -22,3 +22,4 @@ export const simplyDeepCopy = <T>(object: T): T =>
             return <T>JSON.parse(JSON.stringify(object));
     }
 };
+export const isExist = <T>(value: T | null | undefined): value is T => null !== (value ?? null);

@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { isExist } from './base';
 const sectionKeyRegExp = /^(.+)\.([^.]+)$/;
 type PropertiesEntry<valueT> =
 {
@@ -62,7 +63,7 @@ export class Entry<valueT>
     { }
     regulate = (rawKey: string, value: valueT | undefined): valueT =>
     {
-        if (undefined === value)
+        if ( ! isExist(value))
         {
             return <valueT>this.data.properties?.default;
         }
@@ -76,14 +77,15 @@ export class Entry<valueT>
         }
         else
         {
-            if (undefined !== this.data.properties?.minimum && value < this.data.properties?.minimum)
+            const minimum = this.data.properties?.minimum;
+            if (isExist(minimum) && value < minimum)
             {
-                return this.data.properties?.minimum;
+                return minimum;
             }
-            else
-            if (undefined !== this.data.properties?.maximum && this.data.properties?.maximum < value)
+            const maximum = this.data.properties?.maximum;
+            if (isExist(maximum) && maximum < value)
             {
-                return this.data.properties?.maximum;
+                return maximum;
             }
         }
         return value;
@@ -231,7 +233,7 @@ export class Entry<valueT>
 
     }
 }
-export class MapEntry<ObjectT>
+export class MapEntry<ObjectT extends object>
 {
     public constructor
     (
@@ -284,14 +286,14 @@ export class MapEntry<ObjectT>
     ) =>
         await this.config.setByLanguageId(languageId, key, scope, configurationTarget);
 }
-export const makeEnumValidator = <ObjectT>(mapObject: ObjectT):
+export const makeEnumValidator = <ObjectT extends object>(mapObject: ObjectT):
     (value: keyof ObjectT) => boolean =>
         (value: keyof ObjectT): boolean =>
             0 <= Object.keys(mapObject).indexOf(value.toString());
 export const stringArrayValidator = (value: string[]) =>
     "[object Array]" === Object.prototype.toString.call(value) &&
     value.map(i => "string" === typeof i).reduce((a, b) => a && b, true);
-export type IEntry<valueT> = Entry<valueT> | MapEntry<valueT>;
+export type IEntry<valueT extends object> = Entry<valueT> | MapEntry<valueT>;
 export class Root<PropertiesT extends PropertiesBaseType>
 {
     constructor(public properties: PropertiesT) { }
@@ -301,13 +303,13 @@ export class Root<PropertiesT extends PropertiesBaseType>
         defaultScope: DefaultScope,
         validator?: (value: valueT) => boolean
     ) => this.register(new Entry({ key, validator, properties: this.properties[key], defaultScope, }))
-    public makeMapEntry = <ObjectT>
+    public makeMapEntry = <ObjectT extends object>
     (
         key: keyof PropertiesT & string,
         defaultScope: DefaultScope,
         mapObject: ObjectT
     ) => this.register(new MapEntry({ key, mapObject, properties: this.properties[key], defaultScope, }))
-    public entries = <IEntry<unknown>[]>[];
+    public entries = <IEntry<any>[]>[];
     private register = <valueT extends IEntry<any>>(entry: valueT): valueT =>
     {
         this.entries.push(entry);
