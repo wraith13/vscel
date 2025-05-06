@@ -3,9 +3,9 @@
         "module": "commonjs",
         "moduleResolution": "node",
         "declaration": true,
-        "target": "es6",
+        "target": "es2018",
         "lib": [
-            "es6",
+            "es2018",
             "scripthost"
         ],
         "noImplicitAny": true,
